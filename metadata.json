@@ -1,0 +1,5 @@
+{
+  "name": "Torneio de Cores 2026",
+  "description": "Aplicativo de gestão de torneio de tênis com 6 equipes, ranking em tempo real e controle de placares por capitães.",
+  "requestFramePermissions": []
+}
