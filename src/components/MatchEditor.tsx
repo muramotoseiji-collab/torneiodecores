@@ -60,8 +60,20 @@ export default function MatchEditor({ match, onClose, onSave }: MatchEditorProps
 
         <div className="space-y-6">
           {/* Team 1 Scores */}
-          <div className="space-y-3">
-            <p className="text-xs font-bold uppercase" style={{ color: team1.color }}>Equipe {team1.name}</p>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: team1.color }}>Equipe {team1.name}</p>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[10px] font-medium text-white">{match.team1_player1.split(' ')[0]}</span>
+                  <span className="text-xs font-black italic text-yellow-500 uppercase">{match.team1_player1.split(' ').slice(1).join(' ')}</span>
+                </div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[10px] font-medium text-white">{match.team1_player2.split(' ')[0]}</span>
+                  <span className="text-xs font-black italic text-yellow-500 uppercase">{match.team1_player2.split(' ').slice(1).join(' ')}</span>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-3 gap-4">
               {[1, 2, 3].map(set => (
                 <div key={set} className="space-y-1">
@@ -80,8 +92,20 @@ export default function MatchEditor({ match, onClose, onSave }: MatchEditorProps
           <div className="border-t border-white/5"></div>
 
           {/* Team 2 Scores */}
-          <div className="space-y-3">
-            <p className="text-xs font-bold uppercase" style={{ color: team2.color }}>Equipe {team2.name}</p>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: team2.color }}>Equipe {team2.name}</p>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[10px] font-medium text-white">{match.team2_player1.split(' ')[0]}</span>
+                  <span className="text-xs font-black italic text-yellow-500 uppercase">{match.team2_player1.split(' ').slice(1).join(' ')}</span>
+                </div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[10px] font-medium text-white">{match.team2_player2.split(' ')[0]}</span>
+                  <span className="text-xs font-black italic text-yellow-500 uppercase">{match.team2_player2.split(' ').slice(1).join(' ')}</span>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-3 gap-4">
               {[1, 2, 3].map(set => (
                 <div key={set} className="space-y-1">

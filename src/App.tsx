@@ -393,16 +393,16 @@ export default function App() {
                           </div>
 
                           {/* Stats Summary */}
-                          <div className="glass-card p-6 md:p-8 space-y-8 rounded-3xl">
+                          <div className="glass-card p-4 md:p-6 space-y-4 rounded-3xl">
                             <div className="grid grid-cols-3 items-center text-center">
-                              <div className="text-4xl md:text-6xl font-black italic text-green-500">{team1Wins}</div>
-                              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Vitórias</div>
-                              <div className="text-4xl md:text-6xl font-black italic text-green-500">{team2Wins}</div>
+                              <div className="text-3xl md:text-5xl font-black italic text-green-500">{team1Wins}</div>
+                              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Vitórias</div>
+                              <div className="text-3xl md:text-5xl font-black italic text-green-500">{team2Wins}</div>
                             </div>
                             <div className="grid grid-cols-3 items-center text-center">
-                              <div className="text-4xl md:text-6xl font-black italic text-blue-500">{team1Sets}</div>
-                              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sets Vencidos</div>
-                              <div className="text-4xl md:text-6xl font-black italic text-blue-500">{team2Sets}</div>
+                              <div className="text-3xl md:text-5xl font-black italic text-blue-500">{team1Sets}</div>
+                              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Sets Vencidos</div>
+                              <div className="text-3xl md:text-5xl font-black italic text-blue-500">{team2Sets}</div>
                             </div>
 
                             <div className="grid grid-cols-3 md:grid-cols-6 gap-2">

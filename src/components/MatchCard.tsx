@@ -38,10 +38,10 @@ export default function MatchCard({ match, isAdmin, onUpdate }: MatchCardProps) 
 
   return (
     <div className="glass-card p-4 relative overflow-hidden">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Match {match.match_number}</span>
-          <span className="text-[10px] font-bold text-gray-500 uppercase">Cat. {match.category}</span>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <span className="text-base font-black text-blue-400 uppercase tracking-[0.25em]">MATCH {match.match_number}</span>
+          <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">CAT. {match.category}</span>
         </div>
         {match.status === 'finished' && (
           <div className="flex items-center gap-1 text-[10px] font-bold text-green-500 uppercase">
@@ -51,15 +51,19 @@ export default function MatchCard({ match, isAdmin, onUpdate }: MatchCardProps) 
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* Team 1 */}
         <div className="flex justify-between items-center">
-          <div className="space-y-0.5">
-            <p className="text-[10px] text-gray-500 font-bold uppercase">{match.team1_player1.split(' ')[0]}</p>
-            <p className="text-sm font-black italic text-yellow-500 uppercase leading-none">{match.team1_player1.split(' ').slice(1).join(' ')}</p>
-            <p className="text-[10px] text-gray-500 font-bold uppercase">{match.team1_player2.split(' ')[0]}</p>
-            <p className="text-sm font-black italic text-yellow-500 uppercase leading-none">{match.team1_player2.split(' ').slice(1).join(' ')}</p>
-            <p className="text-[10px] font-bold uppercase" style={{ color: team1.color }}>{team1.name}</p>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-baseline gap-x-1.5 leading-none">
+              <span className="text-xs font-medium text-white">{match.team1_player1.split(' ')[0]}</span>
+              <span className="text-base font-black italic text-yellow-500 uppercase">{match.team1_player1.split(' ').slice(1).join(' ')}</span>
+            </div>
+            <div className="flex flex-wrap items-baseline gap-x-1.5 leading-none">
+              <span className="text-xs font-medium text-white">{match.team1_player2.split(' ')[0]}</span>
+              <span className="text-base font-black italic text-yellow-500 uppercase">{match.team1_player2.split(' ').slice(1).join(' ')}</span>
+            </div>
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: team1.color }}>{team1.name}</p>
           </div>
           <div className="flex gap-2">
             {[match.team1_set1, match.team1_set2, match.team1_set3].map((set, i) => (
@@ -72,12 +76,16 @@ export default function MatchCard({ match, isAdmin, onUpdate }: MatchCardProps) 
 
         {/* Team 2 */}
         <div className="flex justify-between items-center">
-          <div className="space-y-0.5">
-            <p className="text-[10px] text-gray-500 font-bold uppercase">{match.team2_player1.split(' ')[0]}</p>
-            <p className="text-sm font-black italic text-yellow-500 uppercase leading-none">{match.team2_player1.split(' ').slice(1).join(' ')}</p>
-            <p className="text-[10px] text-gray-500 font-bold uppercase">{match.team2_player2.split(' ')[0]}</p>
-            <p className="text-sm font-black italic text-yellow-500 uppercase leading-none">{match.team2_player2.split(' ').slice(1).join(' ')}</p>
-            <p className="text-[10px] font-bold uppercase" style={{ color: team2.color }}>{team2.name}</p>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-baseline gap-x-1.5 leading-none">
+              <span className="text-xs font-medium text-white">{match.team2_player1.split(' ')[0]}</span>
+              <span className="text-base font-black italic text-yellow-500 uppercase">{match.team2_player1.split(' ').slice(1).join(' ')}</span>
+            </div>
+            <div className="flex flex-wrap items-baseline gap-x-1.5 leading-none">
+              <span className="text-xs font-medium text-white">{match.team2_player2.split(' ')[0]}</span>
+              <span className="text-base font-black italic text-yellow-500 uppercase">{match.team2_player2.split(' ').slice(1).join(' ')}</span>
+            </div>
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: team2.color }}>{team2.name}</p>
           </div>
           <div className="flex gap-2">
             {[match.team2_set1, match.team2_set2, match.team2_set3].map((set, i) => (
@@ -89,12 +97,16 @@ export default function MatchCard({ match, isAdmin, onUpdate }: MatchCardProps) 
         </div>
       </div>
 
-      {canEdit && match.status !== 'finished' && (
+      {isAdmin && (
         <button 
-          className="mt-4 w-full py-2 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors"
+          className={`mt-4 w-full py-2 border rounded-lg text-[10px] font-bold uppercase tracking-widest transition-colors ${
+            match.status === 'finished' 
+              ? 'bg-yellow-600/20 hover:bg-yellow-600/40 border-yellow-500/30 text-yellow-500' 
+              : 'bg-blue-600/20 hover:bg-blue-600/40 border-blue-500/30 text-blue-400'
+          }`}
           onClick={() => onUpdate?.(match)}
         >
-          Inserir Placar
+          {match.status === 'finished' ? 'Editar Placar' : 'Inserir Placar'}
         </button>
       )}
     </div>
