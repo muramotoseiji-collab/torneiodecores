@@ -1,7 +1,7 @@
 import React from 'react';
 import { Match, Team } from '../types';
 import { TEAMS } from '../constants';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Flag } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useState, useEffect } from 'react';
 
@@ -63,7 +63,12 @@ export default function MatchCard({ match, isAdmin, onUpdate }: MatchCardProps) 
               <span className="text-xs font-medium text-white">{match.team1_player2.split(' ')[0]}</span>
               <span className="text-base font-black italic text-yellow-500 uppercase">{match.team1_player2.split(' ').slice(1).join(' ')}</span>
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: team1.color }}>{team1.name}</p>
+            <div className="flex items-center gap-2">
+              <div className="flag-wave">
+                <Flag size={14} fill={team1.color} color={team1.color === '#ffffff' ? '#000000' : team1.color} strokeWidth={3} />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: team1.color }}>{team1.name}</p>
+            </div>
           </div>
           <div className="flex gap-2">
             {[match.team1_set1, match.team1_set2, match.team1_set3].map((set, i) => (
@@ -85,7 +90,12 @@ export default function MatchCard({ match, isAdmin, onUpdate }: MatchCardProps) 
               <span className="text-xs font-medium text-white">{match.team2_player2.split(' ')[0]}</span>
               <span className="text-base font-black italic text-yellow-500 uppercase">{match.team2_player2.split(' ').slice(1).join(' ')}</span>
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: team2.color }}>{team2.name}</p>
+            <div className="flex items-center gap-2">
+              <div className="flag-wave">
+                <Flag size={14} fill={team2.color} color={team2.color === '#ffffff' ? '#000000' : team2.color} strokeWidth={3} />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: team2.color }}>{team2.name}</p>
+            </div>
           </div>
           <div className="flex gap-2">
             {[match.team2_set1, match.team2_set2, match.team2_set3].map((set, i) => (

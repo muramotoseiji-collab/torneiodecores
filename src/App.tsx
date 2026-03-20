@@ -185,7 +185,7 @@ export default function App() {
           <div className="space-y-4">
             <button 
               onClick={() => handleLogin('viewer')}
-              className="w-full py-4 glass-card hover:bg-white/5 transition-all flex items-center justify-center gap-3 font-bold uppercase tracking-widest text-sm"
+              className="w-full py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 hover:from-blue-500 hover:via-purple-500 hover:to-red-500 rounded-xl font-bold uppercase tracking-widest text-sm transition-all active:scale-95 shadow-lg shadow-purple-600/20"
             >
               Entrar como Tenista
             </button>
@@ -211,7 +211,7 @@ export default function App() {
               {error && <p className="text-red-500 text-[10px] font-bold text-center uppercase">{error}</p>}
               <button 
                 onClick={() => handleLogin('admin')}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 hover:from-blue-500 hover:via-purple-500 hover:to-red-500 rounded-xl font-bold uppercase tracking-widest text-sm transition-all active:scale-95 shadow-lg shadow-purple-600/20"
+                className="w-full py-4 bg-gray-200 text-gray-900 hover:bg-white rounded-xl font-bold uppercase tracking-widest text-sm transition-all active:scale-95"
               >
                 Acessar Painel
               </button>
@@ -234,21 +234,32 @@ export default function App() {
           </div>
         </div>
 
-        <div className="flex gap-2 p-1 glass-card max-w-md mx-auto">
-          <button 
-            onClick={() => setActiveTab('ranking')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'ranking' ? 'bg-white text-brand-bg shadow-lg' : 'text-gray-400 hover:text-white'}`}
-          >
-            <LayoutDashboard size={16} />
-            Pontuação Geral
-          </button>
-          <button 
-            onClick={() => setActiveTab('matches')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'matches' ? 'bg-white text-brand-bg shadow-lg' : 'text-gray-400 hover:text-white'}`}
-          >
-            <Swords size={16} />
-            Jogos
-          </button>
+        <div className="flex p-1 glass-card max-w-sm mx-auto rounded-2xl">
+          {[
+            { id: 'ranking', label: 'Pontuação Geral', shortLabel: 'Ranking', icon: LayoutDashboard },
+            { id: 'matches', label: 'Jogos', shortLabel: 'Jogos', icon: Swords }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as 'ranking' | 'matches')}
+              className={`relative flex-1 flex items-center justify-center py-3 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors duration-300 z-10 ${
+                activeTab === tab.id ? 'text-brand-bg' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-white rounded-xl shadow-lg"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <span className="relative z-20 flex items-center gap-2">
+                <tab.icon size={16} />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.shortLabel}</span>
+              </span>
+            </button>
+          ))}
         </div>
       </header>
 

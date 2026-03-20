@@ -24,3 +24,17 @@
 .input-field {
   @apply bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 transition-colors;
 }
+
+@keyframes wave {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(10deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.flag-wave {
+  display: inline-block;
+  animation: wave 2s ease-in-out infinite;
+  transform-origin: bottom left;
+}

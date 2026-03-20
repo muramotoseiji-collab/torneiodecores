@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Match, Team } from '../types';
-import { X } from 'lucide-react';
+import { X, Flag } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { TEAMS } from '../constants';
 
@@ -62,7 +62,12 @@ export default function MatchEditor({ match, onClose, onSave }: MatchEditorProps
           {/* Team 1 Scores */}
           <div className="space-y-4">
             <div className="space-y-1">
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: team1.color }}>Equipe {team1.name}</p>
+              <div className="flex items-center gap-2">
+                <div className="flag-wave">
+                  <Flag size={14} fill={team1.color} color={team1.color === '#ffffff' ? '#000000' : team1.color} strokeWidth={3} />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: team1.color }}>Equipe {team1.name}</p>
+              </div>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-[10px] font-medium text-white">{match.team1_player1.split(' ')[0]}</span>
@@ -94,7 +99,12 @@ export default function MatchEditor({ match, onClose, onSave }: MatchEditorProps
           {/* Team 2 Scores */}
           <div className="space-y-4">
             <div className="space-y-1">
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: team2.color }}>Equipe {team2.name}</p>
+              <div className="flex items-center gap-2">
+                <div className="flag-wave">
+                  <Flag size={14} fill={team2.color} color={team2.color === '#ffffff' ? '#000000' : team2.color} strokeWidth={3} />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: team2.color }}>Equipe {team2.name}</p>
+              </div>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-[10px] font-medium text-white">{match.team2_player1.split(' ')[0]}</span>

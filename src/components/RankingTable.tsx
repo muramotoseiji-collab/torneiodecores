@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Ranking, Match, Confrontation } from '../types';
 import { TEAMS } from '../constants';
-import { Trophy, Info, Loader2 } from 'lucide-react';
+import { Trophy, Info, Loader2, Flag } from 'lucide-react';
 import { motion } from 'motion/react';
 import { supabase } from '../lib/supabase';
 
@@ -158,21 +158,21 @@ export default function RankingTable() {
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
             <tr className="text-[10px] uppercase text-gray-500 font-bold border-b border-white/5">
-              <th className="pb-4 px-2">Pos</th>
-              <th className="pb-4 px-2">Equipe</th>
-              <th className="pb-4 px-2 text-blue-400">P</th>
-              <th className="pb-4 px-2">V</th>
-              <th className="pb-4 px-2">E</th>
-              <th className="pb-4 px-2">D</th>
-              <th className="pb-4 px-2 text-yellow-400">VJ</th>
-              <th className="pb-4 px-2 text-red-400">DJ</th>
-              <th className="pb-4 px-2 text-green-400">SG</th>
-              <th className="pb-4 px-2">F</th>
-              <th className="pb-4 px-2">E</th>
-              <th className="pb-4 px-2">D</th>
-              <th className="pb-4 px-2">C</th>
-              <th className="pb-4 px-2">B</th>
-              <th className="pb-4 px-2">A</th>
+              <th className="pb-4 px-2" title="Posição">Pos</th>
+              <th className="pb-4 px-2" title="Equipe">Equipe</th>
+              <th className="pb-4 px-2 text-blue-400" title="Pontos">P</th>
+              <th className="pb-4 px-2" title="Vitórias (Confrontos)">V</th>
+              <th className="pb-4 px-2" title="Empates (Confrontos)">E</th>
+              <th className="pb-4 px-2" title="Derrotas (Confrontos)">D</th>
+              <th className="pb-4 px-2 text-yellow-400" title="Vitórias em Jogos">VJ</th>
+              <th className="pb-4 px-2 text-red-400" title="Derrotas em Jogos">DJ</th>
+              <th className="pb-4 px-2 text-green-400" title="Sets Ganhos">SG</th>
+              <th className="pb-4 px-2" title="Vitórias Categoria F">F</th>
+              <th className="pb-4 px-2" title="Vitórias Categoria E">E</th>
+              <th className="pb-4 px-2" title="Vitórias Categoria D">D</th>
+              <th className="pb-4 px-2" title="Vitórias Categoria C">C</th>
+              <th className="pb-4 px-2" title="Vitórias Categoria B">B</th>
+              <th className="pb-4 px-2" title="Vitórias Categoria A">A</th>
             </tr>
           </thead>
           <tbody>
@@ -187,8 +187,13 @@ export default function RankingTable() {
                   className="border-b border-white/5 hover:bg-white/5 transition-colors"
                 >
                   <td className="py-4 px-2 font-bold italic text-yellow-500">{idx + 1}º</td>
-                  <td className="py-4 px-2 font-black italic tracking-tighter" style={{ color: team?.color }}>
-                    {rank.team_name}
+                  <td className="py-4 px-2 font-black italic tracking-tighter">
+                    <div className="flex items-center gap-2">
+                      <div className="flag-wave">
+                        <Flag size={14} fill={team?.color} color={team?.color === '#ffffff' ? '#000000' : team?.color} strokeWidth={3} />
+                      </div>
+                      <span style={{ color: team?.color }}>{rank.team_name}</span>
+                    </div>
                   </td>
                   <td className="py-4 px-2 font-bold text-blue-400">{rank.points}</td>
                   <td className="py-4 px-2 text-gray-300">{rank.wins}</td>
