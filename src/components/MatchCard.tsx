@@ -8,12 +8,11 @@ import { useState, useEffect } from 'react';
 interface MatchCardProps {
   key?: string | number;
   match: Match;
-  isCaptain: boolean;
-  loggedTeam?: string | null;
+  isAdmin: boolean;
   onUpdate?: (match: Match) => void;
 }
 
-export default function MatchCard({ match, isCaptain, loggedTeam, onUpdate }: MatchCardProps) {
+export default function MatchCard({ match, isAdmin, onUpdate }: MatchCardProps) {
   const [team1, setTeam1] = useState<Team | null>(null);
   const [team2, setTeam2] = useState<Team | null>(null);
 
@@ -35,7 +34,7 @@ export default function MatchCard({ match, isCaptain, loggedTeam, onUpdate }: Ma
 
   if (!team1 || !team2) return <div className="glass-card h-40 animate-pulse bg-white/5"></div>;
 
-  const canEdit = isCaptain && loggedTeam && (team1.id === loggedTeam || team2.id === loggedTeam);
+  const canEdit = isAdmin;
 
   return (
     <div className="glass-card p-4 relative overflow-hidden">

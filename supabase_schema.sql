@@ -6,11 +6,11 @@ CREATE TABLE teams (
   text_color TEXT NOT NULL
 );
 
--- Captains table for simple login
-CREATE TABLE captains (
+-- Admins table for simple login
+CREATE TABLE admins (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  team_id TEXT REFERENCES teams(id),
-  password TEXT NOT NULL, -- In a real app, use Supabase Auth, but this is for the requested simple login
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -56,14 +56,9 @@ INSERT INTO teams (id, name, color, text_color) VALUES
 ('verde', 'VERDE', '#22c55e', '#22c55e'),
 ('amarelo', 'AMARELO', '#eab308', '#eab308');
 
--- Initial Captains Data (Passwords are the team names in lowercase for simplicity)
-INSERT INTO captains (team_id, password) VALUES
-('azul', 'azul123'),
-('roxo', 'roxo123'),
-('branco', 'branco123'),
-('vermelho', 'vermelho123'),
-('verde', 'verde123'),
-('amarelo', 'amarelo123');
+-- Initial Admin Data
+INSERT INTO admins (username, password) VALUES
+('admin', 'admin123');
 
 -- Enable Realtime
 ALTER PUBLICATION supabase_realtime ADD TABLE confrontations;

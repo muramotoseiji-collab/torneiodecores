@@ -12,9 +12,8 @@ export default function App() {
   const [selectedConfrontationId, setSelectedConfrontationId] = useState<string | null>(null);
   const [confrontations, setConfrontations] = useState<any[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<'viewer' | 'captain'>('viewer');
-  const [loggedTeam, setLoggedTeam] = useState<string | null>(null);
-  const [loginTeamId, setLoginTeamId] = useState('');
+  const [userRole, setUserRole] = useState<'viewer' | 'admin'>('viewer');
+  const [adminUsername, setAdminUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
@@ -90,36 +89,34 @@ export default function App() {
     };
   }, [selectedDate, selectedConfrontationId]);
 
-  const handleLogin = async (role: 'viewer' | 'captain') => {
+  const handleLogin = async (role: 'viewer' | 'admin') => {
     if (role === 'viewer') {
       setIsLoggedIn(true);
       setUserRole('viewer');
-      setLoggedTeam(null);
       return;
     }
 
-    // Captain Login Logic
+    // Admin Login Logic
     try {
-      if (!loginTeamId) {
-        setError('Selecione um time.');
+      if (!adminUsername) {
+        setError('Digite o usuário.');
         return;
       }
 
       const { data, error } = await supabase
-        .from('captains')
-        .select('team_id')
-        .eq('team_id', loginTeamId)
+        .from('admins')
+        .select('username')
+        .eq('username', adminUsername)
         .eq('password', password)
         .single();
 
       if (error || !data) {
-        setError('Senha incorreta ou time não encontrado.');
+        setError('Usuário ou senha incorretos.');
         return;
       }
 
       setIsLoggedIn(true);
-      setUserRole('captain');
-      setLoggedTeam(data.team_id);
+      setUserRole('admin');
       setError('');
     } catch (err) {
       setError('Erro ao conectar com o banco de dados.');
@@ -129,7 +126,7 @@ export default function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserRole('viewer');
-    setLoggedTeam(null);
+    setAdminUsername('');
     setPassword('');
   };
 
@@ -190,35 +187,30 @@ export default function App() {
               onClick={() => handleLogin('viewer')}
               className="w-full py-4 glass-card hover:bg-white/5 transition-all flex items-center justify-center gap-3 font-bold uppercase tracking-widest text-sm"
             >
-              Entrar como Espectador
+              Entrar como Tenista
             </button>
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/5"></span></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-brand-card px-2 text-gray-500 font-bold">Ou Capitão</span></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-brand-card px-2 text-gray-500 font-bold">Acesso Administrativo</span></div>
             </div>
             <div className="space-y-3">
-              <select 
-                value={loginTeamId}
-                onChange={(e) => setLoginTeamId(e.target.value)}
-                className="input-field w-full text-center bg-brand-card text-white appearance-none cursor-pointer"
-              >
-                <option value="" className="bg-brand-bg text-white">Selecione seu Time</option>
-                {TEAMS.map(team => (
-                  <option key={team.id} value={team.id} className="bg-brand-bg text-white">
-                    Time {team.name}
-                  </option>
-                ))}
-              </select>
+              <input 
+                type="text" 
+                placeholder="Usuário" 
+                value={adminUsername}
+                onChange={(e) => setAdminUsername(e.target.value)}
+                className="input-field w-full text-center" 
+              />
               <input 
                 type="password" 
-                placeholder="Senha do Capitão" 
+                placeholder="Senha" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="input-field w-full text-center" 
               />
               {error && <p className="text-red-500 text-[10px] font-bold text-center uppercase">{error}</p>}
               <button 
-                onClick={() => handleLogin('captain')}
+                onClick={() => handleLogin('admin')}
                 className="w-full py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 hover:from-blue-500 hover:via-purple-500 hover:to-red-500 rounded-xl font-bold uppercase tracking-widest text-sm transition-all active:scale-95 shadow-lg shadow-purple-600/20"
               >
                 Acessar Painel
@@ -274,9 +266,9 @@ export default function App() {
               
               {/* Logout & Status */}
               <div className="flex flex-col items-center gap-4 pt-8">
-                {userRole === 'captain' && loggedTeam && (
+                {userRole === 'admin' && (
                   <div className="px-6 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-[10px] font-bold uppercase tracking-widest text-blue-400">
-                    VOCÊ ESTÁ LOGADO COMO TIME <span className="text-white">{TEAMS.find(t => t.id === loggedTeam)?.name.toUpperCase() || loggedTeam.toUpperCase()}</span>
+                    VOCÊ ESTÁ LOGADO COMO <span className="text-white">ADMINISTRADOR</span>
                   </div>
                 )}
                 <button 
@@ -438,8 +430,7 @@ export default function App() {
                               <MatchCard 
                                 key={match.id} 
                                 match={match} 
-                                isCaptain={userRole === 'captain'} 
-                                loggedTeam={loggedTeam}
+                                isAdmin={userRole === 'admin'} 
                                 onUpdate={(m) => setEditingMatch(m)}
                               />
                             ))}
@@ -453,9 +444,9 @@ export default function App() {
 
               {/* Logout & Status (at the bottom) */}
               <div className="flex flex-col items-center gap-4 pt-8 pb-12">
-                {userRole === 'captain' && loggedTeam && (
+                {userRole === 'admin' && (
                   <div className="px-6 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-[10px] font-bold uppercase tracking-widest text-blue-400">
-                    VOCÊ ESTÁ LOGADO COMO TIME <span className="text-white">{TEAMS.find(t => t.id === loggedTeam)?.name.toUpperCase() || loggedTeam.toUpperCase()}</span>
+                    VOCÊ ESTÁ LOGADO COMO <span className="text-white">ADMINISTRADOR</span>
                   </div>
                 )}
                 <button 
