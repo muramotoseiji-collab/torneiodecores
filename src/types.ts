@@ -43,6 +43,8 @@ export interface Ranking {
   wins: number;
   draws: number;
   losses: number;
+  match_wins: number;
+  match_losses: number;
   sets_won: number;
   cat_f_wins: number;
   cat_e_wins: number;

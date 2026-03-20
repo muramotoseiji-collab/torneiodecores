@@ -124,9 +124,30 @@ export default function App() {
     setPassword('');
   };
 
-  const handleSaveMatch = (updatedMatch: Match) => {
-    setMatches(prev => prev.map(m => m.id === updatedMatch.id ? updatedMatch : m));
-    setEditingMatch(null);
+  const handleSaveMatch = async (updatedMatch: Match) => {
+    try {
+      const { error } = await supabase
+        .from('matches')
+        .update({
+          team1_set1: updatedMatch.team1_set1,
+          team1_set2: updatedMatch.team1_set2,
+          team1_set3: updatedMatch.team1_set3,
+          team2_set1: updatedMatch.team2_set1,
+          team2_set2: updatedMatch.team2_set2,
+          team2_set3: updatedMatch.team2_set3,
+          winner_team_id: updatedMatch.winner_team_id,
+          status: updatedMatch.status
+        })
+        .eq('id', updatedMatch.id);
+
+      if (error) throw error;
+      
+      setEditingMatch(null);
+      // fetchMatches() will be called by the realtime subscription
+    } catch (err) {
+      console.error('Error saving match:', err);
+      alert('Erro ao salvar o placar. Tente novamente.');
+    }
   };
 
   const finishedMatches = matches.filter(m => m.status === 'finished');

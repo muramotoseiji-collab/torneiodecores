@@ -32,6 +32,8 @@ export default function RankingTable() {
           wins: 0,
           draws: 0,
           losses: 0,
+          match_wins: 0,
+          match_losses: 0,
           sets_won: 0,
           cat_f_wins: 0,
           cat_e_wins: 0,
@@ -52,16 +54,19 @@ export default function RankingTable() {
           const teamWins = confMatches?.filter(m => m.winner_team_id === team.id).length || 0;
           const opponentWins = confMatches?.filter(m => m.winner_team_id && m.winner_team_id !== team.id).length || 0;
 
+          teamRank.match_wins += teamWins;
+          teamRank.match_losses += opponentWins;
+
           // Calculate sets won
           confMatches?.forEach(m => {
             if (isTeam1) {
-              teamRank.sets_won += (m.set1_team1 > m.set1_team2 ? 1 : 0);
-              teamRank.sets_won += (m.set2_team1 > m.set2_team2 ? 1 : 0);
-              teamRank.sets_won += (m.set3_team1 > m.set3_team2 ? 1 : 0);
+              teamRank.sets_won += (m.team1_set1 > m.team2_set1 ? 1 : 0);
+              teamRank.sets_won += (m.team1_set2 > m.team2_set2 ? 1 : 0);
+              teamRank.sets_won += (m.team1_set3 > m.team2_set3 ? 1 : 0);
             } else if (isTeam2) {
-              teamRank.sets_won += (m.set1_team2 > m.set1_team1 ? 1 : 0);
-              teamRank.sets_won += (m.set2_team2 > m.set2_team1 ? 1 : 0);
-              teamRank.sets_won += (m.set3_team2 > m.set3_team1 ? 1 : 0);
+              teamRank.sets_won += (m.team2_set1 > m.team1_set1 ? 1 : 0);
+              teamRank.sets_won += (m.team2_set2 > m.team1_set2 ? 1 : 0);
+              teamRank.sets_won += (m.team2_set3 > m.team1_set3 ? 1 : 0);
             }
           });
 
@@ -92,10 +97,11 @@ export default function RankingTable() {
         return teamRank;
       });
 
-      // Sort by points, then wins, then sets, then category wins (F, E, D, C, B, A)
+      // Sort by points, then wins, then fewer losses, then sets, then category wins (F, E, D, C, B, A)
       newRankings.sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
         if (b.wins !== a.wins) return b.wins - a.wins;
+        if (a.losses !== b.losses) return a.losses - b.losses; // Fewer losses is better
         if (b.sets_won !== a.sets_won) return b.sets_won - a.sets_won;
         if (b.cat_f_wins !== a.cat_f_wins) return b.cat_f_wins - a.cat_f_wins;
         if (b.cat_e_wins !== a.cat_e_wins) return b.cat_e_wins - a.cat_e_wins;
@@ -158,6 +164,8 @@ export default function RankingTable() {
               <th className="pb-4 px-2">V</th>
               <th className="pb-4 px-2">E</th>
               <th className="pb-4 px-2">D</th>
+              <th className="pb-4 px-2 text-yellow-400">VJ</th>
+              <th className="pb-4 px-2 text-red-400">DJ</th>
               <th className="pb-4 px-2 text-green-400">SG</th>
               <th className="pb-4 px-2">F</th>
               <th className="pb-4 px-2">E</th>
@@ -186,6 +194,8 @@ export default function RankingTable() {
                   <td className="py-4 px-2 text-gray-300">{rank.wins}</td>
                   <td className="py-4 px-2 text-gray-300">{rank.draws}</td>
                   <td className="py-4 px-2 text-gray-300">{rank.losses}</td>
+                  <td className="py-4 px-2 text-yellow-400 font-bold">{rank.match_wins}</td>
+                  <td className="py-4 px-2 text-red-400 font-bold">{rank.match_losses}</td>
                   <td className="py-4 px-2 text-green-400 font-bold">{rank.sets_won}</td>
                   <td className="py-4 px-2 text-gray-400">{rank.cat_f_wins}</td>
                   <td className="py-4 px-2 text-gray-400">{rank.cat_e_wins}</td>
