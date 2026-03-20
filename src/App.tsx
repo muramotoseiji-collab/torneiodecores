@@ -9,9 +9,12 @@ import { supabase } from './lib/supabase';
 export default function App() {
   const [activeTab, setActiveTab] = useState<'ranking' | 'matches'>('ranking');
   const [selectedDate, setSelectedDate] = useState(DATES[0]);
+  const [selectedConfrontationId, setSelectedConfrontationId] = useState<string | null>(null);
+  const [confrontations, setConfrontations] = useState<any[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'viewer' | 'captain'>('viewer');
   const [loggedTeam, setLoggedTeam] = useState<string | null>(null);
+  const [loginTeamId, setLoginTeamId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
@@ -24,34 +27,32 @@ export default function App() {
   const fetchMatches = async () => {
     setLoading(true);
     try {
-      // 1. Fetch confrontation for the selected date
-      const { data: confData, error: confError } = await supabase
+      // 1. Fetch all confrontations for the selected date
+      const { data: confsData, error: confsError } = await supabase
         .from('confrontations')
         .select(`
           *,
           team1:teams!confrontations_team1_id_fkey(*),
           team2:teams!confrontations_team2_id_fkey(*)
         `)
-        .eq('date', selectedDate)
-        .limit(1)
-        .single();
+        .eq('date', selectedDate);
 
-      if (confError) {
-        console.error('Error fetching confrontation:', confError);
-        setConfrontation(null);
-        setTeam1(null);
-        setTeam2(null);
+      if (confsError) {
+        console.error('Error fetching confrontations:', confsError);
+        setConfrontations([]);
         setMatches([]);
-      } else {
-        setConfrontation(confData);
-        setTeam1(confData.team1);
-        setTeam2(confData.team2);
+        return;
+      }
 
-        // 2. Fetch matches for this confrontation
+      setConfrontations(confsData || []);
+
+      if (confsData && confsData.length > 0) {
+        // 2. Fetch all matches for all confrontations of this date
+        const confIds = confsData.map(c => c.id);
         const { data: matchData, error: matchError } = await supabase
           .from('matches')
           .select('*')
-          .eq('confrontation_id', confData.id)
+          .in('confrontation_id', confIds)
           .order('match_number', { ascending: true });
 
         if (matchError) {
@@ -59,6 +60,8 @@ export default function App() {
         } else {
           setMatches(matchData || []);
         }
+      } else {
+        setMatches([]);
       }
     } catch (err) {
       console.error('Unexpected error:', err);
@@ -85,7 +88,7 @@ export default function App() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedDate]);
+  }, [selectedDate, selectedConfrontationId]);
 
   const handleLogin = async (role: 'viewer' | 'captain') => {
     if (role === 'viewer') {
@@ -97,14 +100,20 @@ export default function App() {
 
     // Captain Login Logic
     try {
+      if (!loginTeamId) {
+        setError('Selecione um time.');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('captains')
         .select('team_id')
+        .eq('team_id', loginTeamId)
         .eq('password', password)
         .single();
 
       if (error || !data) {
-        setError('Senha incorreta para capitão.');
+        setError('Senha incorreta ou time não encontrado.');
         return;
       }
 
@@ -171,7 +180,7 @@ export default function App() {
               <Swords size={40} />
             </div>
             <h1 className="text-3xl font-black italic tracking-tighter uppercase">
-              Torneio de <span className="text-blue-500">Cores</span> 2026
+              Torneio de <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">Cores</span> 2026
             </h1>
             <p className="text-gray-500 text-sm font-medium">Bem-vindo ao portal do torneio</p>
           </div>
@@ -188,6 +197,18 @@ export default function App() {
               <div className="relative flex justify-center text-xs uppercase"><span className="bg-brand-card px-2 text-gray-500 font-bold">Ou Capitão</span></div>
             </div>
             <div className="space-y-3">
+              <select 
+                value={loginTeamId}
+                onChange={(e) => setLoginTeamId(e.target.value)}
+                className="input-field w-full text-center bg-brand-card text-white appearance-none cursor-pointer"
+              >
+                <option value="" className="bg-brand-bg text-white">Selecione seu Time</option>
+                {TEAMS.map(team => (
+                  <option key={team.id} value={team.id} className="bg-brand-bg text-white">
+                    Time {team.name}
+                  </option>
+                ))}
+              </select>
               <input 
                 type="password" 
                 placeholder="Senha do Capitão" 
@@ -198,7 +219,7 @@ export default function App() {
               {error && <p className="text-red-500 text-[10px] font-bold text-center uppercase">{error}</p>}
               <button 
                 onClick={() => handleLogin('captain')}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-700 rounded-xl font-bold uppercase tracking-widest text-sm transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+                className="w-full py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 hover:from-blue-500 hover:via-purple-500 hover:to-red-500 rounded-xl font-bold uppercase tracking-widest text-sm transition-all active:scale-95 shadow-lg shadow-purple-600/20"
               >
                 Acessar Painel
               </button>
@@ -216,7 +237,7 @@ export default function App() {
         <div className="inline-block border-2 border-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 p-[2px] rounded-2xl shadow-2xl">
           <div className="bg-brand-bg px-8 py-4 rounded-[14px]">
             <h1 className="text-2xl md:text-4xl font-black italic tracking-tighter uppercase">
-              Torneio de <span className="text-blue-500">Cores</span> 2026
+              Torneio de <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">Cores</span> 2026
             </h1>
           </div>
         </div>
@@ -247,8 +268,24 @@ export default function App() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
+              className="space-y-8 pb-12"
             >
               <RankingTable />
+              
+              {/* Logout & Status */}
+              <div className="flex flex-col items-center gap-4 pt-8">
+                {userRole === 'captain' && loggedTeam && (
+                  <div className="px-6 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-[10px] font-bold uppercase tracking-widest text-blue-400">
+                    VOCÊ ESTÁ LOGADO COMO TIME <span className="text-white">{TEAMS.find(t => t.id === loggedTeam)?.name.toUpperCase() || loggedTeam.toUpperCase()}</span>
+                  </div>
+                )}
+                <button 
+                  onClick={handleLogout}
+                  className="px-4 py-2 glass-card hover:bg-red-500/10 hover:text-red-500 transition-colors text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2"
+                >
+                  <LogOut size={14} /> Sair
+                </button>
+              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -263,7 +300,10 @@ export default function App() {
                 {DATES.map(date => (
                   <button
                     key={date}
-                    onClick={() => setSelectedDate(date)}
+                    onClick={() => {
+                      setSelectedDate(date);
+                      setSelectedConfrontationId(null);
+                    }}
                     className={`flex-shrink-0 px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border ${selectedDate === date ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20' : 'glass-card border-transparent text-gray-500'}`}
                   >
                     {date}
@@ -271,95 +311,159 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Confrontation Header */}
-              {confrontation && team1 && team2 ? (
-                <>
-                  <div className="text-center py-8 space-y-4">
-                    <p className="text-[10px] font-bold text-yellow-500 uppercase tracking-[0.3em]">Confronto do Dia</p>
-                    <div className="flex items-center justify-center gap-4 md:gap-8">
-                      <h2 className="text-4xl md:text-7xl font-black italic tracking-tighter" style={{ color: team1.color }}>{team1.name.toUpperCase()}</h2>
-                      <span className="text-xl md:text-3xl font-black italic text-gray-700">VS</span>
-                      <h2 className="text-4xl md:text-7xl font-black italic tracking-tighter" style={{ color: team2.color }}>{team2.name.toUpperCase()}</h2>
-                    </div>
-                  </div>
-
-                  {/* Stats Summary */}
-                  <div className="glass-card p-8 space-y-8">
-                    <div className="grid grid-cols-3 items-center text-center">
-                      <div className="text-4xl md:text-6xl font-black italic text-green-500">{team1Wins}</div>
-                      <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Vitórias</div>
-                      <div className="text-4xl md:text-6xl font-black italic text-green-500">{team2Wins}</div>
-                    </div>
-                    <div className="grid grid-cols-3 items-center text-center">
-                      <div className="text-4xl md:text-6xl font-black italic text-blue-500">{team1Sets}</div>
-                      <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sets Vencidos</div>
-                      <div className="text-4xl md:text-6xl font-black italic text-blue-500">{team2Sets}</div>
-                    </div>
-
-                    <div className="grid grid-cols-6 gap-2">
-                      {CATEGORIES.map(cat => {
-                        const catMatches = finishedMatches.filter(m => m.category === cat);
-                        const cat1Wins = catMatches.filter(m => m.winner_team_id === team1.id).length;
-                        const cat2Wins = catMatches.filter(m => m.winner_team_id === team2.id).length;
-                        return (
-                          <div key={cat} className="glass-card p-2 text-center space-y-1">
-                            <p className="text-[8px] font-bold text-gray-500">{cat}</p>
-                            <p className="text-xs font-black italic">
-                              <span style={{ color: team1.color }}>{cat1Wins}</span>
-                              <span className="text-gray-700 mx-1">|</span>
-                              <span style={{ color: team2.color }}>{cat2Wins}</span>
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <div className="flex flex-col items-center gap-4 pt-4">
-                      {userRole === 'captain' && loggedTeam && (
-                        <div className="px-6 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-[10px] font-bold uppercase tracking-widest text-blue-400">
-                          VOCÊ ESTÁ LOGADO COMO TIME <span className="text-white">{TEAMS.find(t => t.id === loggedTeam)?.name.toUpperCase() || loggedTeam.toUpperCase()}</span>
-                        </div>
-                      )}
-                      <div className="flex justify-center gap-4">
-                        <div className="px-4 py-2 glass-card text-[10px] font-bold text-yellow-500 uppercase tracking-widest">
-                          {18 - finishedMatches.length} Jogos Restantes
-                        </div>
-                        <button 
-                          onClick={handleLogout}
-                          className="px-4 py-2 glass-card hover:bg-red-500/10 hover:text-red-500 transition-colors text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2"
-                        >
-                          <LogOut size={14} /> Sair
-                        </button>
+              {/* Confrontation Selection or Detail View */}
+              <AnimatePresence mode="wait">
+                {!selectedConfrontationId ? (
+                  <motion.div
+                    key="selector"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-8 py-10"
+                  >
+                    <div className="text-center space-y-4">
+                      <p className="text-[10px] font-bold text-yellow-500 uppercase tracking-[0.3em]">Confrontos do Dia</p>
+                      <div className="grid grid-cols-1 gap-4">
+                        {confrontations.map(conf => (
+                          <button
+                            key={conf.id}
+                            onClick={() => setSelectedConfrontationId(conf.id)}
+                            className="w-full p-6 rounded-2xl glass-card border-2 border-white/5 hover:border-white/20 transition-all group active:scale-[0.98]"
+                          >
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex-1 text-right">
+                                <h3 className="text-xl md:text-3xl font-black italic tracking-tighter" style={{ color: conf.team1.color }}>
+                                  {conf.team1.name}
+                                </h3>
+                              </div>
+                              <div className="px-4 py-1 rounded-full bg-white/5 text-[10px] font-black italic text-gray-500">VS</div>
+                              <div className="flex-1 text-left">
+                                <h3 className="text-xl md:text-3xl font-black italic tracking-tighter" style={{ color: conf.team2.color }}>
+                                  {conf.team2.name}
+                                </h3>
+                              </div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-white/5 flex justify-center">
+                              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">Ver Detalhes do Confronto</span>
+                            </div>
+                          </button>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                </>
-              ) : !loading && (
-                <div className="py-20 text-center glass-card">
-                  <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Nenhum confronto agendado para esta data.</p>
-                </div>
-              )}
-
-              {/* Match List */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {loading ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="glass-card h-48 animate-pulse bg-white/5"></div>
-                  ))
-                ) : matches.length > 0 ? (
-                  matches.map(match => (
-                    <MatchCard 
-                      key={match.id} 
-                      match={match} 
-                      isCaptain={userRole === 'captain'} 
-                      onUpdate={(m) => setEditingMatch(m)}
-                    />
-                  ))
+                    
+                    {confrontations.length === 0 && !loading && (
+                      <div className="py-20 text-center glass-card rounded-3xl">
+                        <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Nenhum confronto agendado para esta data.</p>
+                      </div>
+                    )}
+                  </motion.div>
                 ) : (
-                  <div className="col-span-full py-20 text-center glass-card">
-                    <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Nenhum jogo encontrado para esta data.</p>
+                  <motion.div
+                    key="detail"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="space-y-8 pb-20"
+                  >
+                    {/* Back Button */}
+                    <button 
+                      onClick={() => setSelectedConfrontationId(null)}
+                      className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+                    >
+                      <div className="p-2 rounded-lg glass-card group-hover:bg-white/10">
+                        <ChevronLeft size={20} />
+                      </div>
+                      <span className="text-xs font-bold uppercase tracking-widest">Voltar para Confrontos</span>
+                    </button>
+
+                    {(() => {
+                      const conf = confrontations.find(c => c.id === selectedConfrontationId);
+                      if (!conf) return null;
+
+                      const confMatches = matches.filter(m => m.confrontation_id === conf.id);
+                      const finishedMatches = confMatches.filter(m => m.status === 'finished');
+                      const team1Wins = finishedMatches.filter(m => m.winner_team_id === conf.team1_id).length;
+                      const team2Wins = finishedMatches.filter(m => m.winner_team_id === conf.team2_id).length;
+                      
+                      const team1Sets = finishedMatches.reduce((acc, m) => acc + (m.team1_set1 > m.team2_set1 ? 1 : 0) + (m.team1_set2 > m.team2_set2 ? 1 : 0) + (m.team1_set3 > m.team2_set3 ? 1 : 0), 0);
+                      const team2Sets = finishedMatches.reduce((acc, m) => acc + (m.team2_set1 > m.team1_set1 ? 1 : 0) + (m.team2_set2 > m.team1_set2 ? 1 : 0) + (m.team2_set3 > m.team1_set3 ? 1 : 0), 0);
+
+                      return (
+                        <div className="space-y-8">
+                          {/* Confrontation Header */}
+                          <div className="text-center space-y-4">
+                            <p className="text-[10px] font-bold text-yellow-500 uppercase tracking-[0.3em]">Placar do Confronto</p>
+                            <div className="flex items-center justify-center gap-4 md:gap-8">
+                              <h2 className="text-4xl md:text-7xl font-black italic tracking-tighter" style={{ color: conf.team1.color }}>{conf.team1.name.toUpperCase()}</h2>
+                              <span className="text-xl md:text-3xl font-black italic text-gray-700">VS</span>
+                              <h2 className="text-4xl md:text-7xl font-black italic tracking-tighter" style={{ color: conf.team2.color }}>{conf.team2.name.toUpperCase()}</h2>
+                            </div>
+                          </div>
+
+                          {/* Stats Summary */}
+                          <div className="glass-card p-6 md:p-8 space-y-8 rounded-3xl">
+                            <div className="grid grid-cols-3 items-center text-center">
+                              <div className="text-4xl md:text-6xl font-black italic text-green-500">{team1Wins}</div>
+                              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Vitórias</div>
+                              <div className="text-4xl md:text-6xl font-black italic text-green-500">{team2Wins}</div>
+                            </div>
+                            <div className="grid grid-cols-3 items-center text-center">
+                              <div className="text-4xl md:text-6xl font-black italic text-blue-500">{team1Sets}</div>
+                              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sets Vencidos</div>
+                              <div className="text-4xl md:text-6xl font-black italic text-blue-500">{team2Sets}</div>
+                            </div>
+
+                            <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                              {CATEGORIES.map(cat => {
+                                const catMatches = finishedMatches.filter(m => m.category === cat);
+                                const cat1Wins = catMatches.filter(m => m.winner_team_id === conf.team1_id).length;
+                                const cat2Wins = catMatches.filter(m => m.winner_team_id === conf.team2_id).length;
+                                return (
+                                  <div key={cat} className="glass-card p-2 text-center space-y-1 rounded-xl">
+                                    <p className="text-[8px] font-bold text-gray-500">{cat}</p>
+                                    <p className="text-xs font-black italic">
+                                      <span style={{ color: conf.team1.color }}>{cat1Wins}</span>
+                                      <span className="text-gray-700 mx-1">|</span>
+                                      <span style={{ color: conf.team2.color }}>{cat2Wins}</span>
+                                    </p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Match List */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {confMatches.map(match => (
+                              <MatchCard 
+                                key={match.id} 
+                                match={match} 
+                                isCaptain={userRole === 'captain'} 
+                                loggedTeam={loggedTeam}
+                                onUpdate={(m) => setEditingMatch(m)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Logout & Status (at the bottom) */}
+              <div className="flex flex-col items-center gap-4 pt-8 pb-12">
+                {userRole === 'captain' && loggedTeam && (
+                  <div className="px-6 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-[10px] font-bold uppercase tracking-widest text-blue-400">
+                    VOCÊ ESTÁ LOGADO COMO TIME <span className="text-white">{TEAMS.find(t => t.id === loggedTeam)?.name.toUpperCase() || loggedTeam.toUpperCase()}</span>
                   </div>
                 )}
+                <button 
+                  onClick={handleLogout}
+                  className="px-4 py-2 glass-card hover:bg-red-500/10 hover:text-red-500 transition-colors text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2"
+                >
+                  <LogOut size={14} /> Sair
+                </button>
               </div>
 
               {editingMatch && (
