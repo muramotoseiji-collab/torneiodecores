@@ -155,24 +155,24 @@ export default function RankingTable() {
           <h2 className="text-xl font-bold italic uppercase tracking-wider">Classificação Geral</h2>
         </div>
 
-        <table className="w-full text-left border-collapse min-w-[800px]">
+        <table className="w-full text-left border-collapse min-w-[1100px]">
           <thead>
-            <tr className="text-[10px] uppercase text-gray-500 font-bold border-b border-white/5">
-              <th className="pb-4 px-2" title="Posição">Pos</th>
-              <th className="pb-4 px-2" title="Equipe">Equipe</th>
-              <th className="pb-4 px-2 text-blue-400" title="Pontos">P</th>
-              <th className="pb-4 px-2" title="Vitórias (Confrontos)">V</th>
-              <th className="pb-4 px-2" title="Empates (Confrontos)">E</th>
-              <th className="pb-4 px-2" title="Derrotas (Confrontos)">D</th>
-              <th className="pb-4 px-2 text-yellow-400" title="Vitórias em Jogos">VJ</th>
-              <th className="pb-4 px-2 text-red-400" title="Derrotas em Jogos">DJ</th>
-              <th className="pb-4 px-2 text-green-400" title="Sets Ganhos">SG</th>
-              <th className="pb-4 px-2" title="Vitórias Categoria F">F</th>
-              <th className="pb-4 px-2" title="Vitórias Categoria E">E</th>
-              <th className="pb-4 px-2" title="Vitórias Categoria D">D</th>
-              <th className="pb-4 px-2" title="Vitórias Categoria C">C</th>
-              <th className="pb-4 px-2" title="Vitórias Categoria B">B</th>
-              <th className="pb-4 px-2" title="Vitórias Categoria A">A</th>
+            <tr className="text-[9px] uppercase text-gray-500 font-bold border-b border-white/5">
+              <th className="pb-4 px-2" title="Posição">POS</th>
+              <th className="pb-4 px-2" title="Equipe">EQUIPE</th>
+              <th className="pb-4 px-2 text-blue-400" title="Pontos">PONTOS</th>
+              <th className="pb-4 px-2 whitespace-nowrap" title="Vitorias no Confronto">VITÓRIAS NO CONFRONTO</th>
+              <th className="pb-4 px-2 whitespace-nowrap" title="Empate no Confronto">EMPATE NO CONFRONTO</th>
+              <th className="pb-4 px-2 whitespace-nowrap" title="Derrotas no Confronto">DERROTAS NO CONFRONTO</th>
+              <th className="pb-4 px-2 text-yellow-400" title="Vitorias">VITÓRIAS</th>
+              <th className="pb-4 px-2 text-red-400" title="Derrotas">DERROTAS</th>
+              <th className="pb-4 px-2 text-green-400 whitespace-nowrap" title="Saldo de Sets">SALDO DE SETS</th>
+              <th className="pb-4 px-2" title="Vitorias Categoria F">F</th>
+              <th className="pb-4 px-2" title="Vitorias Categoria E">E</th>
+              <th className="pb-4 px-2" title="Vitorias Categoria D">D</th>
+              <th className="pb-4 px-2" title="Vitorias Categoria C">C</th>
+              <th className="pb-4 px-2" title="Vitorias Categoria B">B</th>
+              <th className="pb-4 px-2" title="Vitorias Categoria A">A</th>
             </tr>
           </thead>
           <tbody>
@@ -227,12 +227,12 @@ export default function RankingTable() {
         <div className="glass-card p-6">
           <h3 className="text-purple-400 font-bold uppercase text-xs mb-4 tracking-widest">Critérios de Desempate</h3>
           <ol className="space-y-2 text-xs font-medium text-gray-400 list-decimal list-inside">
-            <li>PONTOS GANHOS</li>
-            <li>VITÓRIAS (CONFRONTOS GANHOS)</li>
+            <li>PONTOS</li>
+            <li>VITORIAS NO CONFRONTO</li>
             <li>MENOS DERROTAS</li>
-            <li>QTD. DE SETS GANHOS</li>
-            <li>VITÓRIAS CATEGORIA F</li>
-            <li>VITÓRIAS CATEGORIA E</li>
+            <li>SALDO DE SETS</li>
+            <li>VITORIAS CATEGORIA F</li>
+            <li>VITORIAS CATEGORIA E</li>
           </ol>
         </div>
       </div>
