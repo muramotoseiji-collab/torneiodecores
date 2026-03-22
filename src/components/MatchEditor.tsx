@@ -64,33 +64,42 @@ export default function MatchEditor({ match, onClose, onSave }: MatchEditorProps
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <div className="flag-wave">
-                  <Flag size={14} fill={team1.color} color={team1.color === '#ffffff' ? '#000000' : team1.color} strokeWidth={3} />
+                  <Flag size={18} fill={team1.color} color={team1.color === '#ffffff' ? '#000000' : team1.color} strokeWidth={3} />
                 </div>
                 <p className="text-xs font-bold uppercase tracking-widest" style={{ color: team1.color }}>Equipe {team1.name}</p>
               </div>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[10px] font-medium text-white">{match.team1_player1.split(' ')[0]}</span>
-                  <span className="text-xs font-black italic text-yellow-500 uppercase">{match.team1_player1.split(' ').slice(1).join(' ')}</span>
+                  <span className="text-[10px] font-medium text-white">{(match.team1_player1 || '').split(' ')[0]}</span>
+                  <span className="text-xs font-black italic text-white uppercase">{(match.team1_player1 || '').split(' ').slice(1).join(' ')}</span>
                 </div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[10px] font-medium text-white">{match.team1_player2.split(' ')[0]}</span>
-                  <span className="text-xs font-black italic text-yellow-500 uppercase">{match.team1_player2.split(' ').slice(1).join(' ')}</span>
+                  <span className="text-[10px] font-medium text-white">{(match.team1_player2 || '').split(' ')[0]}</span>
+                  <span className="text-xs font-black italic text-white uppercase">{(match.team1_player2 || '').split(' ').slice(1).join(' ')}</span>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map(set => (
-                <div key={set} className="space-y-1">
-                  <label className="text-[10px] text-gray-500 uppercase">Set {set}</label>
-                  <input 
-                    type="number" 
-                    value={formData[`team1_set${set}` as keyof Match] as number}
-                    onChange={(e) => setFormData({ ...formData, [`team1_set${set}`]: parseInt(e.target.value) || 0 })}
-                    className="input-field w-full text-center text-xl font-black"
-                  />
-                </div>
-              ))}
+              {[1, 2, 3].map(set => {
+                const key = `team1_set${set}` as keyof Match;
+                const val = formData[key];
+                return (
+                  <div key={set} className="space-y-1">
+                    <label className="text-[10px] text-gray-500 uppercase">Set {set}</label>
+                    <input 
+                      type="number" 
+                      value={val === 0 ? '' : val}
+                      placeholder="0"
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => {
+                        const v = e.target.value === '' ? 0 : parseInt(e.target.value);
+                        setFormData({ ...formData, [key]: isNaN(v) ? 0 : v });
+                      }}
+                      className="input-field w-full text-center text-xl font-black"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -101,33 +110,42 @@ export default function MatchEditor({ match, onClose, onSave }: MatchEditorProps
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <div className="flag-wave">
-                  <Flag size={14} fill={team2.color} color={team2.color === '#ffffff' ? '#000000' : team2.color} strokeWidth={3} />
+                  <Flag size={18} fill={team2.color} color={team2.color === '#ffffff' ? '#000000' : team2.color} strokeWidth={3} />
                 </div>
                 <p className="text-xs font-bold uppercase tracking-widest" style={{ color: team2.color }}>Equipe {team2.name}</p>
               </div>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[10px] font-medium text-white">{match.team2_player1.split(' ')[0]}</span>
-                  <span className="text-xs font-black italic text-yellow-500 uppercase">{match.team2_player1.split(' ').slice(1).join(' ')}</span>
+                  <span className="text-[10px] font-medium text-white">{(match.team2_player1 || '').split(' ')[0]}</span>
+                  <span className="text-xs font-black italic text-white uppercase">{(match.team2_player1 || '').split(' ').slice(1).join(' ')}</span>
                 </div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[10px] font-medium text-white">{match.team2_player2.split(' ')[0]}</span>
-                  <span className="text-xs font-black italic text-yellow-500 uppercase">{match.team2_player2.split(' ').slice(1).join(' ')}</span>
+                  <span className="text-[10px] font-medium text-white">{(match.team2_player2 || '').split(' ')[0]}</span>
+                  <span className="text-xs font-black italic text-white uppercase">{(match.team2_player2 || '').split(' ').slice(1).join(' ')}</span>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map(set => (
-                <div key={set} className="space-y-1">
-                  <label className="text-[10px] text-gray-500 uppercase">Set {set}</label>
-                  <input 
-                    type="number" 
-                    value={formData[`team2_set${set}` as keyof Match] as number}
-                    onChange={(e) => setFormData({ ...formData, [`team2_set${set}`]: parseInt(e.target.value) || 0 })}
-                    className="input-field w-full text-center text-xl font-black"
-                  />
-                </div>
-              ))}
+              {[1, 2, 3].map(set => {
+                const key = `team2_set${set}` as keyof Match;
+                const val = formData[key];
+                return (
+                  <div key={set} className="space-y-1">
+                    <label className="text-[10px] text-gray-500 uppercase">Set {set}</label>
+                    <input 
+                      type="number" 
+                      value={val === 0 ? '' : val}
+                      placeholder="0"
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => {
+                        const v = e.target.value === '' ? 0 : parseInt(e.target.value);
+                        setFormData({ ...formData, [key]: isNaN(v) ? 0 : v });
+                      }}
+                      className="input-field w-full text-center text-xl font-black"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -22,6 +22,14 @@ export default function App() {
   const [confrontation, setConfrontation] = useState<any>(null);
   const [team1, setTeam1] = useState<any>(null);
   const [team2, setTeam2] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = () => setShowSuggestions(false);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const fetchMatches = async () => {
     setLoading(true);
@@ -163,6 +171,22 @@ export default function App() {
   const team1Sets = team1 ? finishedMatches.reduce((acc, m) => acc + (m.team1_set1 > m.team2_set1 ? 1 : 0) + (m.team1_set2 > m.team2_set2 ? 1 : 0) + (m.team1_set3 > m.team2_set3 ? 1 : 0), 0) : 0;
   const team2Sets = team2 ? finishedMatches.reduce((acc, m) => acc + (m.team2_set1 > m.team1_set1 ? 1 : 0) + (m.team2_set2 > m.team1_set2 ? 1 : 0) + (m.team2_set3 > m.team1_set3 ? 1 : 0), 0) : 0;
 
+  // Search logic
+  const allPlayers: string[] = Array.from(new Set(matches.flatMap(m => [
+    m.team1_player1, m.team1_player2, m.team2_player1, m.team2_player2
+  ]).filter((p): p is string => typeof p === 'string')));
+
+  const suggestions = searchTerm.length >= 2 
+    ? allPlayers.filter(p => p.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 5)
+    : [];
+
+  const filteredMatches = searchTerm 
+    ? matches.filter(m => 
+        [m.team1_player1, m.team1_player2, m.team2_player1, m.team2_player2]
+        .some(p => typeof p === 'string' && p.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : matches;
+
   if (!isLoggedIn) {
     // ... (Login UI remains the same)
     return (
@@ -299,24 +323,123 @@ export default function App() {
               className="space-y-6"
             >
               {/* Date Selector */}
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                {DATES.map(date => (
-                  <button
-                    key={date}
-                    onClick={() => {
-                      setSelectedDate(date);
-                      setSelectedConfrontationId(null);
-                    }}
-                    className={`flex-shrink-0 px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border ${selectedDate === date ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20' : 'glass-card border-transparent text-gray-500'}`}
-                  >
-                    {date}
-                  </button>
-                ))}
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                  {DATES.map(date => (
+                    <button
+                      key={date}
+                      onClick={() => {
+                        setSelectedDate(date);
+                        setSelectedConfrontationId(null);
+                        setSearchTerm('');
+                      }}
+                      className={`flex-shrink-0 px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border ${selectedDate === date ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20' : 'glass-card border-transparent text-gray-500'}`}
+                    >
+                      {date}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative" onClick={(e) => e.stopPropagation()}>
+                  <div className="glass-card flex items-center px-4 py-3 gap-3 border border-white/5 focus-within:border-blue-500/50 transition-all rounded-2xl">
+                    <Swords size={18} className="text-gray-500" />
+                    <input 
+                      type="text"
+                      placeholder="Procurar Tenista..."
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setShowSuggestions(true);
+                      }}
+                      onFocus={() => setShowSuggestions(true)}
+                      className="bg-transparent border-none outline-none flex-1 text-sm font-bold uppercase tracking-widest placeholder:text-gray-600"
+                    />
+                    {searchTerm && (
+                      <button 
+                        onClick={() => setSearchTerm('')}
+                        className="p-1 hover:bg-white/10 rounded-full text-gray-500"
+                      >
+                        <ChevronLeft size={16} className="rotate-90" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Suggestions Dropdown */}
+                  <AnimatePresence>
+                    {showSuggestions && suggestions.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-50 left-0 right-0 mt-2 glass-card border border-white/10 shadow-2xl overflow-hidden rounded-2xl"
+                      >
+                        {suggestions.map((player, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setSearchTerm(player);
+                              setShowSuggestions(false);
+                            }}
+                            className="w-full px-4 py-3 text-left text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-colors border-b border-white/5 last:border-none"
+                          >
+                            {player}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
-              {/* Confrontation Selection or Detail View */}
+              {/* Search Results or Normal View */}
               <AnimatePresence mode="wait">
-                {!selectedConfrontationId ? (
+                {searchTerm ? (
+                  <motion.div
+                    key="search-results"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-6 py-4"
+                  >
+                    <div className="flex items-center justify-between px-2">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">
+                        Resultados para: <span className="text-blue-400">{searchTerm}</span>
+                      </p>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                        {filteredMatches.length} {filteredMatches.length === 1 ? 'Jogo' : 'Jogos'}
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {filteredMatches.map(match => {
+                        const conf = confrontations.find(c => c.id === match.confrontation_id);
+                        return (
+                          <div key={match.id} className="space-y-2">
+                            {conf && (
+                              <div className="flex items-center justify-center gap-2 px-4 py-1 rounded-full bg-white/5 border border-white/5 w-fit mx-auto">
+                                <span className="text-[8px] font-black italic uppercase" style={{ color: conf.team1.color }}>{conf.team1.name}</span>
+                                <span className="text-[8px] font-black italic text-gray-700">VS</span>
+                                <span className="text-[8px] font-black italic uppercase" style={{ color: conf.team2.color }}>{conf.team2.name}</span>
+                              </div>
+                            )}
+                            <MatchCard 
+                              match={match} 
+                              isAdmin={userRole === 'admin'} 
+                              onUpdate={(m) => setEditingMatch(m)}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {filteredMatches.length === 0 && (
+                      <div className="py-20 text-center glass-card rounded-3xl">
+                        <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Nenhum jogo encontrado para este tenista.</p>
+                      </div>
+                    )}
+                  </motion.div>
+                ) : !selectedConfrontationId ? (
                   <motion.div
                     key="selector"
                     initial={{ opacity: 0, y: 10 }}
