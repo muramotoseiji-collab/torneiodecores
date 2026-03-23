@@ -97,12 +97,10 @@ export default function RankingTable() {
         return teamRank;
       });
 
-      // Sort by points, then wins, then fewer losses, then sets, then category wins (F, E, D, C, B, A)
+      // Sort by points, then total match wins, then category wins (F, E, D, C, B, A)
       newRankings.sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
-        if (b.wins !== a.wins) return b.wins - a.wins;
-        if (a.losses !== b.losses) return a.losses - b.losses; // Fewer losses is better
-        if (b.sets_won !== a.sets_won) return b.sets_won - a.sets_won;
+        if (b.match_wins !== a.match_wins) return b.match_wins - a.match_wins;
         if (b.cat_f_wins !== a.cat_f_wins) return b.cat_f_wins - a.cat_f_wins;
         if (b.cat_e_wins !== a.cat_e_wins) return b.cat_e_wins - a.cat_e_wins;
         if (b.cat_d_wins !== a.cat_d_wins) return b.cat_d_wins - a.cat_d_wins;
@@ -155,24 +153,23 @@ export default function RankingTable() {
           <h2 className="text-xl font-bold italic uppercase tracking-wider">Classificação Geral</h2>
         </div>
 
-        <table className="w-full text-left border-separate border-spacing-0 min-w-[1100px]">
+        <table className="w-full text-left border-separate border-spacing-0 min-w-[800px]">
           <thead>
-            <tr className="text-[9px] uppercase text-gray-500 font-bold">
-              <th className="pb-4 px-2 sticky left-0 bg-[#0f172a] z-10 border-b border-white/5" title="Posição">POS</th>
-              <th className="pb-4 px-2 sticky left-[48px] bg-[#0f172a] z-10 border-b border-white/5" title="Equipe">EQUIPE</th>
-              <th className="pb-4 px-2 text-blue-400 border-b border-white/5" title="Pontos">PONTOS</th>
-              <th className="pb-4 px-2 whitespace-nowrap border-b border-white/5" title="Vitorias no Confronto">VITÓRIAS NO CONFRONTO</th>
-              <th className="pb-4 px-2 whitespace-nowrap border-b border-white/5" title="Empate no Confronto">EMPATE NO CONFRONTO</th>
-              <th className="pb-4 px-2 whitespace-nowrap border-b border-white/5" title="Derrotas no Confronto">DERROTAS NO CONFRONTO</th>
-              <th className="pb-4 px-2 text-yellow-400 border-b border-white/5" title="Vitorias">VITÓRIAS</th>
-              <th className="pb-4 px-2 text-red-400 border-b border-white/5" title="Derrotas">DERROTAS</th>
-              <th className="pb-4 px-2 text-green-400 whitespace-nowrap border-b border-white/5" title="Saldo de Sets">SALDO DE SETS</th>
-              <th className="pb-4 px-2 border-b border-white/5" title="Vitorias Categoria F">F</th>
-              <th className="pb-4 px-2 border-b border-white/5" title="Vitorias Categoria E">E</th>
-              <th className="pb-4 px-2 border-b border-white/5" title="Vitorias Categoria D">D</th>
-              <th className="pb-4 px-2 border-b border-white/5" title="Vitorias Categoria C">C</th>
-              <th className="pb-4 px-2 border-b border-white/5" title="Vitorias Categoria B">B</th>
-              <th className="pb-4 px-2 border-b border-white/5" title="Vitorias Categoria A">A</th>
+            <tr className="text-[9px] uppercase text-gray-500 font-bold leading-tight">
+              <th className="pb-4 px-2 sticky left-0 bg-[#0f172a] z-10 border-b border-white/5 w-10" title="Posição">POS</th>
+              <th className="pb-4 px-2 sticky left-[40px] bg-[#0f172a] z-10 border-b border-white/5 w-32" title="Equipe">EQUIPE</th>
+              <th className="pb-4 px-2 text-blue-400 border-b border-white/5 w-16" title="Pontos">PONTOS</th>
+              <th className="pb-4 px-2 border-b border-white/5 w-20" title="Vitorias no Confronto">VITÓRIAS<br/>CONFRONTO</th>
+              <th className="pb-4 px-2 border-b border-white/5 w-20" title="Empate no Confronto">EMPATE<br/>CONFRONTO</th>
+              <th className="pb-4 px-2 border-b border-white/5 w-20" title="Derrotas no Confronto">DERROTAS<br/>CONFRONTO</th>
+              <th className="pb-4 px-2 text-yellow-400 border-b border-white/5 w-16" title="Vitorias">VITÓRIAS<br/>TOTAIS</th>
+              <th className="pb-4 px-2 text-red-400 border-b border-white/5 w-16" title="Derrotas">DERROTAS<br/>TOTAIS</th>
+              <th className="pb-4 px-2 border-b border-white/5 w-8" title="Vitorias Categoria F">F</th>
+              <th className="pb-4 px-2 border-b border-white/5 w-8" title="Vitorias Categoria E">E</th>
+              <th className="pb-4 px-2 border-b border-white/5 w-8" title="Vitorias Categoria D">D</th>
+              <th className="pb-4 px-2 border-b border-white/5 w-8" title="Vitorias Categoria C">C</th>
+              <th className="pb-4 px-2 border-b border-white/5 w-8" title="Vitorias Categoria B">B</th>
+              <th className="pb-4 px-2 border-b border-white/5 w-8" title="Vitorias Categoria A">A</th>
             </tr>
           </thead>
           <tbody>
@@ -186,28 +183,27 @@ export default function RankingTable() {
                   transition={{ delay: idx * 0.05 }}
                   className="hover:bg-white/5 transition-colors group"
                 >
-                  <td className="py-4 px-2 font-bold italic text-yellow-500 sticky left-0 bg-[#0f172a] z-10 border-b border-white/5 group-hover:bg-white/10 transition-colors">{idx + 1}º</td>
-                  <td className="py-4 px-2 font-black italic tracking-tighter sticky left-[48px] bg-[#0f172a] z-10 border-b border-white/5 group-hover:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-2 min-w-[120px]">
+                  <td className="py-3 px-2 font-bold italic text-yellow-500 sticky left-0 bg-[#0f172a] z-10 border-b border-white/5 group-hover:bg-white/10 transition-colors">{idx + 1}º</td>
+                  <td className="py-3 px-2 font-black italic tracking-tighter sticky left-[40px] bg-[#0f172a] z-10 border-b border-white/5 group-hover:bg-white/10 transition-colors">
+                    <div className="flex items-center gap-2 min-w-[100px]">
                       <div className="flag-wave">
                         <Flag size={14} fill={team?.color} color={team?.color === '#ffffff' ? '#000000' : team?.color} strokeWidth={3} />
                       </div>
-                      <span style={{ color: team?.color }}>{rank.team_name}</span>
+                      <span style={{ color: team?.color }} className="truncate">{rank.team_name}</span>
                     </div>
                   </td>
-                  <td className="py-4 px-2 font-bold text-blue-400 border-b border-white/5">{rank.points}</td>
-                  <td className="py-4 px-2 text-gray-300 border-b border-white/5">{rank.wins}</td>
-                  <td className="py-4 px-2 text-gray-300 border-b border-white/5">{rank.draws}</td>
-                  <td className="py-4 px-2 text-gray-300 border-b border-white/5">{rank.losses}</td>
-                  <td className="py-4 px-2 text-yellow-400 font-bold border-b border-white/5">{rank.match_wins}</td>
-                  <td className="py-4 px-2 text-red-400 font-bold border-b border-white/5">{rank.match_losses}</td>
-                  <td className="py-4 px-2 text-green-400 font-bold border-b border-white/5">{rank.sets_won}</td>
-                  <td className="py-4 px-2 text-gray-400 border-b border-white/5">{rank.cat_f_wins}</td>
-                  <td className="py-4 px-2 text-gray-400 border-b border-white/5">{rank.cat_e_wins}</td>
-                  <td className="py-4 px-2 text-gray-400 border-b border-white/5">{rank.cat_d_wins}</td>
-                  <td className="py-4 px-2 text-gray-400 border-b border-white/5">{rank.cat_c_wins}</td>
-                  <td className="py-4 px-2 text-gray-400 border-b border-white/5">{rank.cat_b_wins}</td>
-                  <td className="py-4 px-2 text-gray-400 border-b border-white/5">{rank.cat_a_wins}</td>
+                  <td className="py-3 px-2 font-bold text-blue-400 border-b border-white/5">{rank.points}</td>
+                  <td className="py-3 px-2 text-gray-300 border-b border-white/5 text-center">{rank.wins}</td>
+                  <td className="py-3 px-2 text-gray-300 border-b border-white/5 text-center">{rank.draws}</td>
+                  <td className="py-3 px-2 text-gray-300 border-b border-white/5 text-center">{rank.losses}</td>
+                  <td className="py-3 px-2 text-yellow-400 font-bold border-b border-white/5 text-center">{rank.match_wins}</td>
+                  <td className="py-3 px-2 text-red-400 font-bold border-b border-white/5 text-center">{rank.match_losses}</td>
+                  <td className="py-3 px-2 text-gray-400 border-b border-white/5 text-center">{rank.cat_f_wins}</td>
+                  <td className="py-3 px-2 text-gray-400 border-b border-white/5 text-center">{rank.cat_e_wins}</td>
+                  <td className="py-3 px-2 text-gray-400 border-b border-white/5 text-center">{rank.cat_d_wins}</td>
+                  <td className="py-3 px-2 text-gray-400 border-b border-white/5 text-center">{rank.cat_c_wins}</td>
+                  <td className="py-3 px-2 text-gray-400 border-b border-white/5 text-center">{rank.cat_b_wins}</td>
+                  <td className="py-3 px-2 text-gray-400 border-b border-white/5 text-center">{rank.cat_a_wins}</td>
                 </motion.tr>
               );
             })}
@@ -228,11 +224,13 @@ export default function RankingTable() {
           <h3 className="text-purple-400 font-bold uppercase text-xs mb-4 tracking-widest">Critérios de Desempate</h3>
           <ol className="space-y-2 text-xs font-medium text-gray-400 list-decimal list-inside">
             <li>PONTOS</li>
-            <li>VITORIAS NO CONFRONTO</li>
-            <li>MENOS DERROTAS</li>
-            <li>SALDO DE SETS</li>
+            <li>VITÓRIAS TOTAIS</li>
             <li>VITORIAS CATEGORIA F</li>
             <li>VITORIAS CATEGORIA E</li>
+            <li>VITORIAS CATEGORIA D</li>
+            <li>VITORIAS CATEGORIA C</li>
+            <li>VITORIAS CATEGORIA B</li>
+            <li>VITORIAS CATEGORIA A</li>
           </ol>
         </div>
       </div>
