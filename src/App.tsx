@@ -260,7 +260,7 @@ export default function App() {
 
         <div className="flex p-1 glass-card max-w-sm mx-auto rounded-2xl">
           {[
-            { id: 'ranking', label: 'Pontuação Geral', shortLabel: 'Ranking', icon: LayoutDashboard },
+            { id: 'ranking', label: 'Pontos | Classificatória', shortLabel: 'Pontos', icon: LayoutDashboard },
             { id: 'matches', label: 'Jogos', shortLabel: 'Jogos', icon: Swords }
           ].map((tab) => (
             <button
@@ -448,13 +448,19 @@ export default function App() {
                     className="space-y-8 py-10"
                   >
                     <div className="text-center space-y-4">
-                      <p className="text-[10px] font-bold text-yellow-500 uppercase tracking-[0.3em]">Confrontos do Dia</p>
+                      <p className={`text-[10px] font-bold uppercase tracking-[0.3em] ${selectedDate === '29/03' ? 'text-purple-400' : 'text-yellow-500'}`}>
+                        {selectedDate === '29/03' ? 'FINAIS DO TORNEIO' : 'Confrontos do Dia'}
+                      </p>
                       <div className="grid grid-cols-1 gap-4">
                         {confrontations.map(conf => (
                           <button
                             key={conf.id}
                             onClick={() => setSelectedConfrontationId(conf.id)}
-                            className="w-full p-6 rounded-2xl glass-card border-2 border-white/5 hover:border-white/20 transition-all group active:scale-[0.98]"
+                            className={`w-full p-6 rounded-2xl glass-card border-2 transition-all group active:scale-[0.98] ${
+                              selectedDate === '29/03' 
+                                ? 'border-purple-500/30 hover:border-purple-500/50 shadow-lg shadow-purple-500/10' 
+                                : 'border-white/5 hover:border-white/20'
+                            }`}
                           >
                             <div className="flex items-center justify-between gap-4">
                               <div className="flex-1 text-right">
@@ -462,15 +468,17 @@ export default function App() {
                                   {conf.team1.name}
                                 </h3>
                               </div>
-                              <div className="px-4 py-1 rounded-full bg-white/5 text-[10px] font-black italic text-gray-500">VS</div>
+                              <div className={`px-4 py-1 rounded-full text-[10px] font-black italic ${selectedDate === '29/03' ? 'bg-purple-500/20 text-purple-400' : 'bg-white/5 text-gray-500'}`}>VS</div>
                               <div className="flex-1 text-left">
                                 <h3 className="text-xl md:text-3xl font-black italic tracking-tighter" style={{ color: conf.team2.color }}>
                                   {conf.team2.name}
                                 </h3>
                               </div>
                             </div>
-                            <div className="mt-4 pt-4 border-t border-white/5 flex justify-center">
-                              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">Ver Detalhes do Confronto</span>
+                            <div className={`mt-4 pt-4 border-t flex justify-center ${selectedDate === '29/03' ? 'border-purple-500/20' : 'border-white/5'}`}>
+                              <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${selectedDate === '29/03' ? 'text-purple-400 group-hover:text-purple-300' : 'text-gray-500 group-hover:text-white'}`}>
+                                Ver Detalhes da Final
+                              </span>
                             </div>
                           </button>
                         ))}
@@ -518,7 +526,9 @@ export default function App() {
                         <div className="space-y-8">
                           {/* Confrontation Header */}
                           <div className="text-center space-y-4">
-                            <p className="text-[10px] font-bold text-yellow-500 uppercase tracking-[0.3em]">Placar do Confronto</p>
+                            <p className={`text-[10px] font-bold uppercase tracking-[0.3em] ${conf.date === '29/03' ? 'text-purple-400' : 'text-yellow-500'}`}>
+                              {conf.date === '29/03' ? 'PLACAR DA FINAL' : 'Placar do Confronto'}
+                            </p>
                             <div className="flex items-center justify-center gap-4 md:gap-8">
                               <h2 className="text-4xl md:text-7xl font-black italic tracking-tighter" style={{ color: conf.team1.color }}>{conf.team1.name.toUpperCase()}</h2>
                               <span className="text-xl md:text-3xl font-black italic text-gray-700">VS</span>
@@ -610,7 +620,7 @@ export default function App() {
             onClick={() => setActiveTab('ranking')}
             className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'ranking' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
           >
-            <LayoutDashboard size={16} /> Ranking
+            <LayoutDashboard size={16} /> Pontos
           </button>
           <button 
             onClick={() => setActiveTab('matches')}

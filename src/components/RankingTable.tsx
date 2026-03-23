@@ -12,17 +12,21 @@ export default function RankingTable() {
   const calculateRankings = async () => {
     setLoading(true);
     try {
-      // Fetch all matches and confrontations to calculate ranking
-      const { data: matches, error: matchError } = await supabase
+      const { data: allMatches, error: matchError } = await supabase
         .from('matches')
         .select('*')
         .eq('status', 'finished');
       
-      const { data: confrontations, error: confError } = await supabase
+      const { data: allConfrontations, error: confError } = await supabase
         .from('confrontations')
         .select('*');
 
       if (matchError || confError) throw matchError || confError;
+
+      // Filter out finals (29/03) from ranking calculation
+      const confrontations = allConfrontations?.filter(c => c.date !== '29/03') || [];
+      const validConfIds = new Set(confrontations.map(c => c.id));
+      const matches = allMatches?.filter(m => validConfIds.has(m.confrontation_id)) || [];
 
       const newRankings: Ranking[] = TEAMS.map(team => {
         const teamRank: Ranking = {
@@ -150,7 +154,7 @@ export default function RankingTable() {
       <div className="glass-card p-4 overflow-x-auto">
         <div className="flex items-center gap-2 mb-6 text-blue-400">
           <Trophy size={24} />
-          <h2 className="text-xl font-bold italic uppercase tracking-wider">Classificação Geral</h2>
+          <h2 className="text-xl font-bold italic uppercase tracking-wider">Classificação | Fase de Grupos</h2>
         </div>
 
         <table className="w-full text-left border-separate border-spacing-0 min-w-[800px]">
