@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Ranking, Match, Confrontation } from '../types';
 import { TEAMS } from '../constants';
-import { Trophy, Info, Loader2, Flag } from 'lucide-react';
+import { Trophy, Info, Loader2, Flag, Calendar, Swords, Target, Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { supabase } from '../lib/supabase';
 
@@ -218,28 +218,126 @@ export default function RankingTable() {
         </table>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="glass-card p-6">
-          <h3 className="text-blue-400 font-bold uppercase text-xs mb-4 tracking-widest">Pontuação nas Classificatórias</h3>
-          <ul className="space-y-2 text-xs font-medium text-gray-400">
-            <li className="flex justify-between"><span>VITÓRIA:</span> <span className="text-white">3 PONTOS</span></li>
-            <li className="flex justify-between"><span>EMPATE:</span> <span className="text-white">2 PONTOS</span></li>
-            <li className="flex justify-between"><span>DERROTA:</span> <span className="text-white">1 PONTO</span></li>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+        {/* Calendário */}
+        <div className="glass-card p-6 space-y-4 md:col-span-2">
+          <div className="flex items-center gap-2 text-blue-400 border-b border-white/5 pb-3">
+            <Calendar size={18} />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em]">Calendário de Confrontos</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="space-y-2">
+              <p className="text-red-400 font-black italic text-lg">Dia 21</p>
+              <ul className="text-[10px] font-bold text-gray-400 space-y-1 uppercase">
+                <li>Vermelho x Amarelo</li>
+                <li>Branco x Verde</li>
+                <li>Azul x Roxo</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <p className="text-red-400 font-black italic text-lg">Dia 22</p>
+              <ul className="text-[10px] font-bold text-gray-400 space-y-1 uppercase">
+                <li>Vermelho x Verde</li>
+                <li>Branco x Roxo</li>
+                <li>Azul x Amarelo</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <p className="text-red-400 font-black italic text-lg">Dia 28</p>
+              <ul className="text-[10px] font-bold text-gray-400 space-y-1 uppercase">
+                <li>Vermelho x Roxo</li>
+                <li>Branco x Amarelo</li>
+                <li>Azul x Verde</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <p className="text-red-400 font-black italic text-lg">Dia 29 <span className="text-[10px] text-gray-500 font-normal">(Finais)</span></p>
+              <ul className="text-[10px] font-bold text-gray-400 space-y-1 uppercase">
+                <li>1º x 2º <span className="text-[8px] opacity-50 block">Entre os 6 times</span></li>
+                <li>3º x 4º <span className="text-[8px] opacity-50 block">Entre os 6 times</span></li>
+                <li>5º x 6º <span className="text-[8px] opacity-50 block">Entre os 6 times</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Formato dos Jogos */}
+        <div className="glass-card p-6 space-y-4">
+          <div className="flex items-center gap-2 text-yellow-400 border-b border-white/5 pb-3">
+            <Swords size={18} />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em]">Formato dos Jogos</h3>
+          </div>
+          <ul className="space-y-3 text-[10px] font-bold text-gray-400 uppercase leading-relaxed list-disc list-inside">
+            <li>Jogos em 2 sets até 6 no sistema no-ad</li>
+            <li>Se estiver 5x5, game simples até 6x5</li>
+            <li>Empate em sets: 3º set em tie-break até 7 (dif. 2 pontos)</li>
           </ul>
         </div>
-        <div className="glass-card p-6">
-          <h3 className="text-purple-400 font-bold uppercase text-xs mb-4 tracking-widest">Critérios de Desempate</h3>
-          <ol className="space-y-2 text-xs font-medium text-gray-400 list-decimal list-inside">
-            <li>PONTOS</li>
-            <li>VITÓRIAS TOTAIS</li>
-            <li>SETS VENCIDOS</li>
-            <li>VITORIAS CATEGORIA F</li>
-            <li>VITORIAS CATEGORIA E</li>
-            <li>VITORIAS CATEGORIA D</li>
-            <li>VITORIAS CATEGORIA C</li>
-            <li>VITORIAS CATEGORIA B</li>
-            <li>VITORIAS CATEGORIA A</li>
+
+        {/* Pontuação */}
+        <div className="glass-card p-6 space-y-4">
+          <div className="flex items-center gap-2 text-green-400 border-b border-white/5 pb-3">
+            <Target size={18} />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em]">Pontuação</h3>
+          </div>
+          <div className="space-y-3">
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Teremos 18 rodadas no total.</p>
+            <ul className="space-y-2 text-[10px] font-bold uppercase">
+              <li className="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                <span className="text-gray-400">Vitória</span>
+                <span className="text-white">3 Pontos</span>
+              </li>
+              <li className="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                <span className="text-gray-400">Empate</span>
+                <span className="text-white">2 Pontos</span>
+              </li>
+              <li className="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                <span className="text-gray-400">Derrota</span>
+                <span className="text-white">1 Ponto</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Critérios de Desempate */}
+        <div className="glass-card p-6 space-y-4">
+          <div className="flex items-center gap-2 text-purple-400 border-b border-white/5 pb-3">
+            <Info size={18} />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em]">Desempate Classificatórias</h3>
+          </div>
+          <ol className="space-y-2 text-[10px] font-bold text-gray-400 uppercase list-decimal list-inside">
+            <li>Pontos ganhos</li>
+            <li>Vitórias (jogos ganhos)</li>
+            <li>Qtd. de sets ganhos</li>
+            <li>Qtd. de vitórias da categoria F</li>
+            <li>Qtd. de vitórias da categoria E...</li>
           </ol>
+        </div>
+
+        {/* Critérios Finais & Duplas */}
+        <div className="glass-card p-6 space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-red-400 border-b border-white/5 pb-3">
+              <Trophy size={18} />
+              <h3 className="text-xs font-black uppercase tracking-[0.2em]">Desempate Finais</h3>
+            </div>
+            <ul className="space-y-2 text-[10px] font-bold text-gray-400 uppercase list-disc list-inside">
+              <li>Vitórias (jogos ganhos)</li>
+              <li>Qtd. de sets ganhos</li>
+              <li>Qtd. de sets vitórias da categoria F</li>
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-blue-400 border-b border-white/5 pb-3">
+              <Users size={18} />
+              <h3 className="text-xs font-black uppercase tracking-[0.2em]">Duplas nas Finais</h3>
+            </div>
+            <ul className="space-y-2 text-[10px] font-bold text-gray-400 uppercase list-disc list-inside">
+              <li>Zera o controle de repetição</li>
+              <li>Definição livre de duplas</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
