@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RankingTable, MatchCard, MatchEditor } from './components';
 import { TEAMS, DATES, CATEGORIES } from './constants';
-import { LayoutDashboard, Swords, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Swords, LogOut, ChevronLeft, ChevronRight, Flag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Match } from './types';
 import { supabase } from './lib/supabase';
@@ -9,6 +9,8 @@ import { supabase } from './lib/supabase';
 export default function App() {
   const [activeTab, setActiveTab] = useState<'ranking' | 'matches'>('ranking');
   const [selectedDate, setSelectedDate] = useState(DATES[0]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [selectedConfrontationId, setSelectedConfrontationId] = useState<string | null>(null);
   const [confrontations, setConfrontations] = useState<any[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -29,6 +31,26 @@ export default function App() {
     const handleClickOutside = () => setShowSuggestions(false);
     window.addEventListener('click', handleClickOutside);
     return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    // Auto-select next date based on today
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    
+    // Find the first date in DATES that is today or in the future
+    const nextDate = DATES.find(d => {
+      const [day, month] = d.split('/').map(Number);
+      const dateObj = new Date(currentYear, month - 1, day);
+      return dateObj >= today;
+    });
+
+    if (nextDate) {
+      setSelectedDate(nextDate);
+    } else {
+      // If all dates are in the past, select the last one
+      setSelectedDate(DATES[DATES.length - 1]);
+    }
   }, []);
 
   const fetchMatches = async () => {
@@ -180,12 +202,21 @@ export default function App() {
     ? allPlayers.filter(p => p.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 5)
     : [];
 
-  const filteredMatches = searchTerm 
-    ? matches.filter(m => 
-        [m.team1_player1, m.team1_player2, m.team2_player1, m.team2_player2]
-        .some(p => typeof p === 'string' && p.toLowerCase().includes(searchTerm.toLowerCase()))
-      )
-    : matches;
+  const filteredMatches = matches.filter(m => {
+    const searchMatch = !searchTerm || [m.team1_player1, m.team1_player2, m.team2_player1, m.team2_player2]
+        .some(p => typeof p === 'string' && p.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const conf = confrontations.find(c => c.id === m.confrontation_id);
+    const teamMatch = !selectedTeamId || (conf && (conf.team1_id === selectedTeamId || conf.team2_id === selectedTeamId));
+    
+    const categoryMatch = !selectedCategory || m.category === selectedCategory;
+    
+    return searchMatch && teamMatch && categoryMatch;
+  });
+
+  const filteredConfrontations = confrontations.filter(conf => 
+    !selectedTeamId || conf.team1_id === selectedTeamId || conf.team2_id === selectedTeamId
+  );
 
   if (!isLoggedIn) {
     // ... (Login UI remains the same)
@@ -250,40 +281,49 @@ export default function App() {
     <div className="min-h-screen pb-20">
       {/* Header */}
       <header className="p-6 text-center space-y-6 max-w-4xl mx-auto">
-        <div className="inline-block border-2 border-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 p-[2px] rounded-2xl shadow-2xl">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-block border-2 border-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 p-[2px] rounded-2xl shadow-2xl"
+        >
           <div className="bg-brand-bg px-8 py-4 rounded-[14px]">
             <h1 className="text-2xl md:text-4xl font-black italic tracking-tighter uppercase">
-              Torneio de <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">Cores</span> 2026
+              Torneio de <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent animate-gradient-x">Cores</span> 2026
             </h1>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="flex p-1 glass-card max-w-sm mx-auto rounded-2xl">
-          {[
-            { id: 'ranking', label: 'Pontos | Classificatória', shortLabel: 'Pontos', icon: LayoutDashboard },
-            { id: 'matches', label: 'Jogos', shortLabel: 'Jogos', icon: Swords }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as 'ranking' | 'matches')}
-              className={`relative flex-1 flex items-center justify-center py-3 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors duration-300 z-10 ${
-                activeTab === tab.id ? 'text-brand-bg' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {activeTab === tab.id && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute inset-0 bg-white rounded-xl shadow-lg"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <span className="relative z-20 flex items-center gap-2">
-                <tab.icon size={16} />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.shortLabel}</span>
-              </span>
-            </button>
-          ))}
+        <div className="relative p-1 bg-white/5 backdrop-blur-xl border border-white/10 max-w-sm mx-auto rounded-[22px] shadow-2xl overflow-hidden">
+          <div className="flex relative z-10">
+            {[
+              { id: 'ranking', label: 'Pontos | Classificatória', shortLabel: 'Pontos', icon: LayoutDashboard },
+              { id: 'matches', label: 'Jogos', shortLabel: 'Jogos', icon: Swords }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as 'ranking' | 'matches')}
+                className={`relative flex-1 flex items-center justify-center py-4 px-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-500 rounded-2xl ${
+                  activeTab === tab.id 
+                    ? 'text-white' 
+                    : 'text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 shadow-[0_0_20px_rgba(37,99,235,0.4)] z-0"
+                    transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
+                    style={{ borderRadius: '16px' }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2 drop-shadow-sm">
+                  <tab.icon size={18} className={activeTab === tab.id ? 'animate-pulse' : ''} />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.shortLabel}</span>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -322,22 +362,107 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              {/* Date Selector */}
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                  {DATES.map(date => (
+              {/* Date & Category Selectors */}
+              <div className="flex flex-col gap-6">
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] px-2">Selecione o Dia</p>
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {DATES.map(date => (
+                      <button
+                        key={date}
+                        onClick={() => {
+                          setSelectedDate(date);
+                          setSelectedConfrontationId(null);
+                          setSearchTerm('');
+                        }}
+                        className={`flex-shrink-0 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-500 border ${
+                          selectedDate === date 
+                            ? 'bg-gradient-to-br from-blue-600 to-indigo-600 border-blue-400 text-white shadow-[0_10px_20px_rgba(37,99,235,0.3)] scale-105' 
+                            : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10 hover:border-white/10'
+                        }`}
+                      >
+                        {date}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] px-2">Filtrar por Categoria</p>
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                     <button
-                      key={date}
                       onClick={() => {
-                        setSelectedDate(date);
+                        setSelectedCategory(null);
                         setSelectedConfrontationId(null);
-                        setSearchTerm('');
                       }}
-                      className={`flex-shrink-0 px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border ${selectedDate === date ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20' : 'glass-card border-transparent text-gray-500'}`}
+                      className={`flex-shrink-0 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 border ${
+                        selectedCategory === null 
+                          ? 'bg-white text-brand-bg border-white shadow-lg scale-105' 
+                          : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10'
+                      }`}
                     >
-                      {date}
+                      TODAS
                     </button>
-                  ))}
+                    {CATEGORIES.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => {
+                          setSelectedCategory(cat);
+                          setSelectedConfrontationId(null);
+                          setSearchTerm('');
+                        }}
+                        className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-500 border ${
+                          selectedCategory === cat 
+                            ? 'bg-blue-500 border-blue-400 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] scale-110' 
+                            : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] px-2">Filtrar por Equipe</p>
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    <button
+                      onClick={() => {
+                        setSelectedTeamId(null);
+                        setSelectedConfrontationId(null);
+                      }}
+                      className={`flex-shrink-0 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 border ${
+                        selectedTeamId === null 
+                          ? 'bg-white text-brand-bg border-white shadow-lg' 
+                          : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10'
+                      }`}
+                    >
+                      TODAS
+                    </button>
+                    {TEAMS.map(team => (
+                      <button
+                        key={team.id}
+                        onClick={() => {
+                          setSelectedTeamId(team.id);
+                          setSelectedConfrontationId(null);
+                          setSearchTerm('');
+                        }}
+                        className={`flex-shrink-0 p-2 rounded-xl transition-all duration-500 border flex items-center justify-center ${
+                          selectedTeamId === team.id 
+                            ? 'bg-white/10 border-white/20 shadow-lg scale-110' 
+                            : 'bg-white/5 border-white/5 hover:bg-white/10'
+                        }`}
+                        title={team.name}
+                      >
+                        <Flag 
+                          size={20} 
+                          fill={team.color} 
+                          color={team.color === '#ffffff' ? '#333' : team.color} 
+                          className={selectedTeamId === team.id ? 'animate-pulse' : ''}
+                        />
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Search Bar */}
@@ -392,7 +517,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Search Results or Normal View */}
+              {/* Search Results, Category View or Normal View */}
               <AnimatePresence mode="wait">
                 {searchTerm ? (
                   <motion.div
@@ -439,6 +564,51 @@ export default function App() {
                       </div>
                     )}
                   </motion.div>
+                ) : selectedCategory ? (
+                  <motion.div
+                    key="category-view"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-6 py-4"
+                  >
+                    <div className="flex items-center justify-between px-2">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">
+                        Categoria: <span className="text-blue-400">{selectedCategory}</span>
+                      </p>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                        {filteredMatches.length} Jogos
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {filteredMatches.map(match => {
+                        const conf = confrontations.find(c => c.id === match.confrontation_id);
+                        return (
+                          <div key={match.id} className="space-y-2">
+                            {conf && (
+                              <div className="flex items-center justify-center gap-2 px-4 py-1 rounded-full bg-white/5 border border-white/5 w-fit mx-auto">
+                                <span className="text-[8px] font-black italic uppercase" style={{ color: conf.team1.color }}>{conf.team1.name}</span>
+                                <span className="text-[8px] font-black italic text-gray-700">VS</span>
+                                <span className="text-[8px] font-black italic uppercase" style={{ color: conf.team2.color }}>{conf.team2.name}</span>
+                              </div>
+                            )}
+                            <MatchCard 
+                              match={match} 
+                              isAdmin={userRole === 'admin'} 
+                              onUpdate={(m) => setEditingMatch(m)}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {filteredMatches.length === 0 && (
+                      <div className="py-20 text-center glass-card rounded-3xl">
+                        <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Nenhum jogo encontrado com estes filtros.</p>
+                      </div>
+                    )}
+                  </motion.div>
                 ) : !selectedConfrontationId ? (
                   <motion.div
                     key="selector"
@@ -452,7 +622,7 @@ export default function App() {
                         {selectedDate === '29/03' ? 'FINAIS DO TORNEIO' : 'Confrontos do Dia'}
                       </p>
                       <div className="grid grid-cols-1 gap-4">
-                        {confrontations.map(conf => (
+                        {filteredConfrontations.map(conf => (
                           <button
                             key={conf.id}
                             onClick={() => setSelectedConfrontationId(conf.id)}
@@ -485,9 +655,13 @@ export default function App() {
                       </div>
                     </div>
                     
-                    {confrontations.length === 0 && !loading && (
+                    {filteredConfrontations.length === 0 && !loading && (
                       <div className="py-20 text-center glass-card rounded-3xl">
-                        <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Nenhum confronto agendado para esta data.</p>
+                        <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">
+                          {selectedTeamId 
+                            ? 'Nenhum confronto desta equipe nesta data.' 
+                            : 'Nenhum confronto agendado para esta data.'}
+                        </p>
                       </div>
                     )}
                   </motion.div>
@@ -613,20 +787,28 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* Mobile Bottom Nav (Optional, but good for UX) */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md md:hidden">
-        <div className="glass-card p-2 flex gap-2 shadow-2xl border-white/10">
+      {/* Mobile Bottom Nav */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md md:hidden z-50">
+        <div className="bg-white/5 backdrop-blur-2xl p-1.5 flex gap-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 rounded-[24px]">
           <button 
             onClick={() => setActiveTab('ranking')}
-            className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'ranking' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
+            className={`flex-1 py-4 rounded-[18px] flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
+              activeTab === 'ranking' 
+                ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]' 
+                : 'text-gray-500'
+            }`}
           >
-            <LayoutDashboard size={16} /> Pontos
+            <LayoutDashboard size={18} className={activeTab === 'ranking' ? 'animate-pulse' : ''} /> Pontos
           </button>
           <button 
             onClick={() => setActiveTab('matches')}
-            className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'matches' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
+            className={`flex-1 py-4 rounded-[18px] flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
+              activeTab === 'matches' 
+                ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]' 
+                : 'text-gray-500'
+            }`}
           >
-            <Swords size={16} /> Jogos
+            <Swords size={18} className={activeTab === 'matches' ? 'animate-pulse' : ''} /> Jogos
           </button>
         </div>
       </div>

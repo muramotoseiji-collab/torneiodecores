@@ -101,10 +101,11 @@ export default function RankingTable() {
         return teamRank;
       });
 
-      // Sort by points, then total match wins, then category wins (F, E, D, C, B, A)
+      // Sort by points, then total match wins, then total sets won, then category wins (F, E, D, C, B, A)
       newRankings.sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
         if (b.match_wins !== a.match_wins) return b.match_wins - a.match_wins;
+        if (b.sets_won !== a.sets_won) return b.sets_won - a.sets_won;
         if (b.cat_f_wins !== a.cat_f_wins) return b.cat_f_wins - a.cat_f_wins;
         if (b.cat_e_wins !== a.cat_e_wins) return b.cat_e_wins - a.cat_e_wins;
         if (b.cat_d_wins !== a.cat_d_wins) return b.cat_d_wins - a.cat_d_wins;
@@ -168,6 +169,7 @@ export default function RankingTable() {
               <th className="pb-4 px-2 border-b border-white/5 w-20" title="Derrotas no Confronto">DERROTAS<br/>CONFRONTO</th>
               <th className="pb-4 px-2 text-yellow-400 border-b border-white/5 w-16" title="Vitorias">VITÓRIAS<br/>TOTAIS</th>
               <th className="pb-4 px-2 text-red-400 border-b border-white/5 w-16" title="Derrotas">DERROTAS<br/>TOTAIS</th>
+              <th className="pb-4 px-2 text-blue-500 border-b border-white/5 w-16" title="Sets Vencidos">SETS<br/>VENCIDOS</th>
               <th className="pb-4 px-2 border-b border-white/5 w-8" title="Vitorias Categoria F">F</th>
               <th className="pb-4 px-2 border-b border-white/5 w-8" title="Vitorias Categoria E">E</th>
               <th className="pb-4 px-2 border-b border-white/5 w-8" title="Vitorias Categoria D">D</th>
@@ -202,6 +204,7 @@ export default function RankingTable() {
                   <td className="py-3 px-2 text-gray-300 border-b border-white/5 text-center">{rank.losses}</td>
                   <td className="py-3 px-2 text-yellow-400 font-bold border-b border-white/5 text-center">{rank.match_wins}</td>
                   <td className="py-3 px-2 text-red-400 font-bold border-b border-white/5 text-center">{rank.match_losses}</td>
+                  <td className="py-3 px-2 text-blue-500 font-bold border-b border-white/5 text-center">{rank.sets_won}</td>
                   <td className="py-3 px-2 text-gray-400 border-b border-white/5 text-center">{rank.cat_f_wins}</td>
                   <td className="py-3 px-2 text-gray-400 border-b border-white/5 text-center">{rank.cat_e_wins}</td>
                   <td className="py-3 px-2 text-gray-400 border-b border-white/5 text-center">{rank.cat_d_wins}</td>
@@ -229,6 +232,7 @@ export default function RankingTable() {
           <ol className="space-y-2 text-xs font-medium text-gray-400 list-decimal list-inside">
             <li>PONTOS</li>
             <li>VITÓRIAS TOTAIS</li>
+            <li>SETS VENCIDOS</li>
             <li>VITORIAS CATEGORIA F</li>
             <li>VITORIAS CATEGORIA E</li>
             <li>VITORIAS CATEGORIA D</li>
